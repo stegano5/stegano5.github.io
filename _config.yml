@@ -62,19 +62,46 @@ collections:
 ##Added new items for drop menu
 # Configuración de los dropdowns y items
 dropdown:
+# - title: "Blue Team"
+#    dropdown: "Blue Team"
+#    subitems:
+#      - title: "SOC Analyst"
+#        subitems:
+#          - title: "Pyramid of Pain"
+#            url: "/blue-team/soc-analyst/pyramid-of-pain/"
+#          - title: "Other Theory"
+#            url: "/blue-team/soc-analyst/other-theory/"
+#      - title: "Log Analysis"
+#        url: "/blue-team/log-analysis/"
+#      - title: "Threat Detection"
+#        url: "/blue-team/threat-detection/"
+
+- title: "Red Team"
+    dropdown: "Red Team"
+    subitems:
+      - title: "Recon"
+        url: "/red-team/recon/"
+      - title: "Enumeration"
+        url: "/red-team/enumeration/"
+
   - title: "Blue Team"
     dropdown: "Blue Team"
     subitems:
       - title: "SOC Analyst"
+        url: "/blue-team/soc-analyst/"
         subitems:
-          - title: "Pyramid of Pain"
-            url: "/blue-team/soc-analyst/pyramid-of-pain/"
-          - title: "Other Theory"
-            url: "/blue-team/soc-analyst/other-theory/"
-      - title: "Log Analysis"
-        url: "/blue-team/log-analysis/"
-      - title: "Threat Detection"
-        url: "/blue-team/threat-detection/"
+          - title: "Log Analysis"
+            url: "/blue-team/log-analysis/"
+          - title: "Networking"
+            url: "/blue-team/networking/"
+      - title: "Digital Forensics"
+        url: "/blue-team/digital-forensics/"
+        subitems:
+          - 
+      - title: "Reversing"
+        url: "/blue-team/reversing/"
+        subitems: 
+          - 
 
   
 # ------------------------------------------------------------------------------
