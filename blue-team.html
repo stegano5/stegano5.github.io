@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blue Team // The Vault</title>
+<link rel="stylesheet" href="css/vault.css">
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">THE<em>//</em>VAULT</a>
+    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html"><span class="status-dot"></span>HOME</a></li>
+      <li class="bt"><a href="blue-team.html">BLUE TEAM</a></li>
+      <li class="rt"><a href="red-team.html">RED TEAM</a></li>
+      <li class="rc"><a href="recursos.html">RESOURCES</a></li>
+      <li><a href="blog.html">BLOG</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <!-- HERO -->
+  <div class="wrapper">
+    <div class="page-hero reveal">
+      <div class="page-hero-bg">BLUE</div>
+      <div class="page-hero-tag cyan">DEFENSE // DETECTION // RESPONSE</div>
+      <h1>BLUE <span>TEAM</span><br>OPERATIONS</h1>
+      <p>Techniques and methodologies for active defense, incident analysis, threat monitoring and system hardening.</p>
+    </div>
+
+    <!-- SUBCATEGORÍAS -->
+    <section style="margin-bottom:90px;" class="reveal">
+      <div class="sec-head">
+        <span class="sec-num">01 //</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title">AVAILABLE <span>MODULES</span></h2>
+      </div>
+      <div class="cards-grid">
+
+        <a href="post-ejemplo.html" class="card">
+          <div class="card-tag c"><div class="tag-dot"></div>SOC ANALYST</div>
+          <span class="card-icon">🔍</span>
+          <h3>SOC ANALYST PATH</h3>
+          <p>SOC analyst fundamentals: alert triage, incident management, Pyramid of Pain and investigation methodologies.</p>
+          <div class="chip-list">
+            <span class="chip c">PYRAMID OF PAIN</span>
+            <span class="chip c">ALERT TRIAGE</span>
+            <span class="chip c">INCIDENT RESPONSE</span>
+          </div>
+        </a>
+
+        <a href="post-ejemplo.html" class="card">
+          <div class="card-tag c"><div class="tag-dot"></div>LOG ANALYSIS</div>
+          <span class="card-icon">📋</span>
+          <h3>LOG ANALYSIS</h3>
+          <p>Forensic analysis of Windows, Linux, firewall and application logs. Anomaly pattern detection and event correlation.</p>
+          <div class="chip-list">
+            <span class="chip c">WINDOWS EVENTS</span>
+            <span class="chip c">SYSLOG</span>
+            <span class="chip c">SPLUNK / ELK</span>
+            <span class="chip c">SIGMA RULES</span>
+          </div>
+        </a>
+
+        <a href="post-ejemplo.html" class="card">
+          <div class="card-tag c"><div class="tag-dot"></div>THREAT DETECTION</div>
+          <span class="card-icon">🎯</span>
+          <h3>THREAT DETECTION</h3>
+          <p>TTP identification using MITRE ATT&CK, detection rule creation and proactive threat hunting across the network.</p>
+          <div class="chip-list">
+            <span class="chip c">MITRE ATT&CK</span>
+            <span class="chip c">THREAT HUNTING</span>
+            <span class="chip c">YARA RULES</span>
+            <span class="chip c">IOC ANALYSIS</span>
+          </div>
+        </a>
+
+        <a href="post-ejemplo.html" class="card">
+          <div class="card-tag c"><div class="tag-dot"></div>NETWORK SECURITY</div>
+          <span class="card-icon">🌐</span>
+          <h3>NETWORK MONITORING</h3>
+          <p>Network traffic monitoring, packet analysis with Wireshark, C2 detection and malicious protocol analysis.</p>
+          <div class="chip-list">
+            <span class="chip c">WIRESHARK</span>
+            <span class="chip c">ZEEK / SURICATA</span>
+            <span class="chip c">C2 DETECTION</span>
+            <span class="chip c">PCAP ANALYSIS</span>
+          </div>
+        </a>
+
+        <a href="post-ejemplo.html" class="card">
+          <div class="card-tag c"><div class="tag-dot"></div>DIGITAL FORENSICS</div>
+          <span class="card-icon">🧬</span>
+          <h3>DIGITAL FORENSICS</h3>
+          <p>Acquisition and forensic analysis of disk images, RAM memory, Windows artifacts and activity timelines.</p>
+          <div class="chip-list">
+            <span class="chip c">VOLATILITY</span>
+            <span class="chip c">AUTOPSY</span>
+            <span class="chip c">MEMORY FORENSICS</span>
+            <span class="chip c">TIMELINE</span>
+          </div>
+        </a>
+
+        <a href="post-ejemplo.html" class="card">
+          <div class="card-tag c"><div class="tag-dot"></div>HARDENING</div>
+          <span class="card-icon">🔒</span>
+          <h3>SYSTEM HARDENING</h3>
+          <p>Hardening guides for Windows and Linux, GPO configuration, CIS Benchmarks and attack surface reduction.</p>
+          <div class="chip-list">
+            <span class="chip c">CIS BENCHMARKS</span>
+            <span class="chip c">GPO / POLICIES</span>
+            <span class="chip c">LINUX HARDENING</span>
+            <span class="chip c">ZERO TRUST</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- POSTS DE BLUE TEAM -->
+    <section style="margin-bottom:90px;" class="reveal">
+      <div class="sec-head">
+        <span class="sec-num">02 //</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title">WRITEUPS <span>BLUE TEAM</span></h2>
+      </div>
+      <div class="post-list">
+        <a href="post-ejemplo.html" class="post-row">
+          <span class="post-date">2024-08-20</span>
+          <div><div class="post-ttl">Pyramid of Pain — Mapping IOCs and attacker cost</div><div class="post-sub">Understanding the impact of each type of indicator of compromise</div></div>
+          <span class="badge c">SOC</span>
+        </a>
+        <a href="post-ejemplo.html" class="post-row">
+          <span class="post-date">2024-07-15</span>
+          <div><div class="post-ttl">Splunk SPL — Essential queries for SOC analysts</div><div class="post-sub">Search cheatsheet, joins and automated alerts</div></div>
+          <span class="badge c">LOG ANALYSIS</span>
+        </a>
+        <a href="post-ejemplo.html" class="post-row">
+          <span class="post-date">2024-06-10</span>
+          <div><div class="post-ttl">Sigma Rules — Creating generic detection rules</div><div class="post-sub">Syntax, SIEM conversion and best practices</div></div>
+          <span class="badge c">DETECTION</span>
+        </a>
+        <a href="post-ejemplo.html" class="post-row">
+          <span class="post-date">2024-05-02</span>
+          <div><div class="post-ttl">RAM memory forensic analysis with Volatility 3</div><div class="post-sub">Extracting processes, connections and in-memory artifacts</div></div>
+          <span class="badge c">FORENSICS</span>
+        </a>
+      </div>
+    </section>
+
+  </div><!-- /wrapper -->
+
+  <footer>
+    <div class="wrapper">
+      <div class="footer-logo">THE//VAULT</div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/ST3G4N05" target="_blank">GitHub</a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">Twitter</a></li>
+      </ul>
+      <p class="footer-copy">© 2024 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</p>
+    </div>
+  </footer>
+</div>
+
+<script src="js/vault.js"></script>
+</body>
+</html>

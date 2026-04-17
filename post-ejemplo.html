@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pyramid of Pain // The Vault</title>
+<link rel="stylesheet" href="css/vault.css">
+<style>
+  /* TOC sidebar */
+  .post-layout { display:grid; grid-template-columns:1fr 260px; gap:48px; align-items:start; }
+  .toc { position:sticky; top:80px; background:var(--dark2); border:1px solid var(--border); padding:22px; }
+  .toc h4 { font-family:var(--font-mono); font-size:.65rem; letter-spacing:.22em; color:var(--cyan); text-shadow:var(--glow-c); margin-bottom:16px; text-transform:uppercase; }
+  .toc ul { list-style:none; }
+  .toc li { border-bottom:1px solid var(--border); }
+  .toc a { display:block; padding:9px 0; font-family:var(--font-mono); font-size:.68rem; color:var(--text-dim); text-decoration:none; letter-spacing:.08em; transition:color .2s; }
+  .toc a:hover { color:var(--cyan); padding-left:6px; }
+  .toc .toc-sub a { padding-left:14px; font-size:.65rem; }
+  @media(max-width:900px){ .post-layout { grid-template-columns:1fr; } .toc { position:static; } }
+
+  /* progress bar */
+  #progress { position:fixed; top:56px; left:0; height:2px; background:var(--cyan); box-shadow:var(--glow-c); z-index:999; transition:width .1s; width:0; }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<canvas id="particles"></canvas>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">THE<em>//</em>VAULT</a>
+    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html"><span class="status-dot"></span>HOME</a></li>
+      <li class="bt"><a href="blue-team.html">BLUE TEAM</a></li>
+      <li class="rt"><a href="red-team.html">RED TEAM</a></li>
+      <li class="rc"><a href="recursos.html">RESOURCES</a></li>
+      <li><a href="blog.html">BLOG</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrap">
+<div class="wrapper" style="padding-top:48px;padding-bottom:60px;">
+
+  <!-- BREADCRUMB -->
+  <div style="font-family:var(--font-mono);font-size:.65rem;letter-spacing:.12em;color:var(--text-dim);margin-bottom:32px;" class="reveal">
+    <a href="index.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">HOME</a>
+    <span style="margin:0 10px;color:var(--magenta)"> // </span>
+    <a href="blue-team.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">BLUE TEAM</a>
+    <span style="margin:0 10px;color:var(--magenta)"> // </span>
+    <span style="color:var(--cyan)">PYRAMID OF PAIN</span>
+  </div>
+
+  <!-- POST HEADER -->
+  <div class="reveal" style="margin-bottom:48px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+      <span class="badge c">BLUE TEAM</span>
+      <span class="badge c">SOC ANALYST</span>
+      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;">2024-08-20</span>
+      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;">// 8 MIN READ</span>
+    </div>
+    <h1 style="font-family:var(--font-hd);font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:14px;">
+      Pyramid of Pain — <span style="color:var(--cyan);text-shadow:var(--glow-c);">IOCs and cost</span> for the attacker
+    </h1>
+    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;">
+      Analysis of David Bianco's Pyramid of Pain framework: how to categorize indicators of compromise based on the cost it takes the attacker to change them, and how to use it to prioritize detections in the SOC.
+    </p>
+  </div>
+
+  <!-- POST LAYOUT: content + TOC -->
+  <div class="post-layout reveal">
+
+    <!-- ARTICLE CONTENT -->
+    <article class="post-article" id="post-content">
+
+      <h2 id="intro">What is the Pyramid of Pain?</h2>
+      <p>
+        The <strong>Pyramid of Pain</strong>, created by David Bianco in 2013, is a conceptual framework that classifies indicators of compromise (IOCs) into six levels based on the <strong>pain</strong> it causes the attacker to change them when detected and blocked by the defender.
+      </p>
+      <p>
+        The premise is simple but powerful: not all IOCs are equally useful. Blocking an IP is trivial for an attacker — they just change the server — but detecting and countering their <strong>Tactics, Techniques and Procedures (TTPs)</strong> forces them to completely rethink their operation.
+      </p>
+
+      <div class="note">
+        The name "Pyramid of Pain" reflects that the higher you are in the pyramid, the more pain you cause the adversary when you detect and respond to those indicators.
+      </div>
+
+      <h2 id="niveles">The 6 levels of the pyramid</h2>
+
+      <h3 id="nivel1">1. Hash Values (trivial)</h3>
+      <p>
+        <strong>Cryptographic hashes</strong> (MD5, SHA1, SHA256) of malicious files are the most basic IOC. They are easy to use in detection rules but also the easiest to evade: an attacker only needs to change one byte of the file to get a different hash.
+      </p>
+      <pre><code># Example: look up hash on VirusTotal
+curl "https://www.virustotal.com/api/v3/files/{hash}" \
+  -H "x-apikey: TU_API_KEY"</code></pre>
+
+      <h3 id="nivel2">2. IP Addresses (easy)</h3>
+      <p>
+        IP addresses for C2 servers, droppers or exfiltration are slightly more costly to change (infrastructure must be redirected), but remain trivial. Sophisticated actors use <strong>fast flux DNS</strong> or cloud infrastructure to rotate IPs automatically.
+      </p>
+
+      <h3 id="nivel3">3. Domain Names (simple)</h3>
+      <p>
+        Domains are somewhat more painful because registering and configuring new domains has a time and financial cost. However, with <strong>domain generation algorithms (DGA)</strong> or cheap domain providers, attackers can rotate domains with relative ease.
+      </p>
+
+      <h3 id="nivel4">4. Network/Host Artifacts (annoying)</h3>
+      <p>
+        Network and host artifacts include things like: <strong>specific User-Agents</strong>, registry paths, filenames in specific locations, or network traffic patterns. They require the attacker to modify their tooling, which consumes development time.
+      </p>
+
+      <div class="warn">
+        Detecting host artifacts requires good endpoint visibility through EDR, Sysmon or similar tools. Without adequate telemetry, this level is difficult to monitor.
+      </div>
+
+      <h3 id="nivel5">5. Tools (challenging)</h3>
+      <p>
+        The tools used by the attacker — Mimikatz, Cobalt Strike, BloodHound — have <strong>characteristic signatures</strong> that are very difficult to fully remove without rewriting the tool. Detecting the use of these tools forces the attacker to invest in developing custom malware, which is costly and slow.
+      </p>
+      <pre><code># Sigma rule example: detect Mimikatz by process name
+title: Mimikatz Execution
+status: experimental
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\mimikatz.exe'
+  condition: selection</code></pre>
+
+      <h3 id="nivel6">6. TTPs (tough)</h3>
+      <p>
+        The attacker's <strong>Tactics, Techniques and Procedures</strong> — mapped in the <a href="https://attack.mitre.org" target="_blank">MITRE ATT&CK</a> framework — are the highest and most valuable level for the defender. These are the adversary's behavioral patterns: how they move laterally, how they establish persistence, how they exfiltrate data. Changing these patterns requires retraining the attack team and completely changing their methodology.
+      </p>
+
+      <h2 id="aplicacion">Practical application in the SOC</h2>
+      <p>
+        In practice, the Pyramid of Pain helps to <strong>prioritize detection investments</strong>:
+      </p>
+      <ul>
+        <li>Don't allocate excessive resources to reactively blocking IPs or hashes</li>
+        <li>Invest in <strong>behavioral detection</strong> (behavioral analytics) focused on TTPs</li>
+        <li>Use MITRE ATT&CK to map your current detection coverage</li>
+        <li>Build SIEM and EDR rules oriented toward detecting actions, not artifacts</li>
+      </ul>
+
+      <p>
+        A rule that detects "process execution with LSASS dump" (TTP) is infinitely more durable than one that looks for the mimikatz.exe hash.
+      </p>
+
+      <h2 id="conclusion">Conclusion</h2>
+      <p>
+        The Pyramid of Pain is a simple but highly effective mental tool for any SOC analyst. Next time you configure a detection rule, ask yourself: <strong>what level of the pyramid am I operating at?</strong> If you're always at the lower levels (hashes, IPs), your detection program can be significantly improved.
+      </p>
+
+      <hr class="divider">
+
+      <!-- NAV entre posts -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:40px;">
+        <a href="blog.html" style="background:var(--dark2);border:1px solid var(--border);padding:18px;text-decoration:none;color:inherit;transition:border-color .2s,background .2s;" onmouseover="this.style.borderColor='rgba(0,255,245,.25)';this.style.background='var(--dark3)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--dark2)'">
+          <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);letter-spacing:.15em;margin-bottom:6px;">← PREVIOUS</div>
+          <div style="font-size:.9rem;font-weight:600;color:#fff;">View all posts</div>
+        </a>
+        <a href="post-ejemplo.html" style="background:var(--dark2);border:1px solid var(--border);padding:18px;text-decoration:none;color:inherit;transition:border-color .2s,background .2s;text-align:right;" onmouseover="this.style.borderColor='rgba(0,255,245,.25)';this.style.background='var(--dark3)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--dark2)'">
+          <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);letter-spacing:.15em;margin-bottom:6px;">NEXT →</div>
+          <div style="font-size:.9rem;font-weight:600;color:#fff;">Log Analysis with Splunk</div>
+        </a>
+      </div>
+
+    </article>
+
+    <!-- TABLE OF CONTENTS -->
+    <aside class="toc">
+      <h4>// INDEX</h4>
+      <ul>
+        <li><a href="#intro">What is the Pyramid of Pain?</a></li>
+        <li><a href="#niveles">The 6 levels</a></li>
+        <li class="toc-sub"><a href="#nivel1">1. Hash Values</a></li>
+        <li class="toc-sub"><a href="#nivel2">2. IP Addresses</a></li>
+        <li class="toc-sub"><a href="#nivel3">3. Domain Names</a></li>
+        <li class="toc-sub"><a href="#nivel4">4. Network Artifacts</a></li>
+        <li class="toc-sub"><a href="#nivel5">5. Tools</a></li>
+        <li class="toc-sub"><a href="#nivel6">6. TTPs</a></li>
+        <li><a href="#aplicacion">Application in the SOC</a></li>
+        <li><a href="#conclusion">Conclusion</a></li>
+      </ul>
+    </aside>
+
+  </div><!-- /post-layout -->
+</div><!-- /wrapper -->
+
+<footer>
+  <div class="wrapper">
+    <div class="footer-logo">THE//VAULT</div>
+    <ul class="footer-links">
+      <li><a href="https://github.com/ST3G4N05" target="_blank">GitHub</a></li>
+      <li><a href="#">LinkedIn</a></li>
+      <li><a href="#">Twitter</a></li>
+    </ul>
+    <p class="footer-copy">© 2024 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</p>
+  </div>
+</footer>
+</div><!-- /page-wrap -->
+
+<script src="js/vault.js"></script>
+<script>
+  // Reading progress bar
+  window.addEventListener('scroll', () => {
+    const el = document.getElementById('post-content');
+    const bar = document.getElementById('progress');
+    if (!el || !bar) return;
+    const rect = el.getBoundingClientRect();
+    const total = el.offsetHeight - window.innerHeight;
+    const scrolled = Math.max(0, -rect.top);
+    bar.style.width = Math.min(100, (scrolled / total) * 100) + '%';
+  });
+</script>
+</body>
+</html>
