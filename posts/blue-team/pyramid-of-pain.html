@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pyramid of Pain // The Vault</title>
+<link rel="stylesheet" href="../../css/vault.css">
+<style>
+  .post-layout{display:grid;grid-template-columns:1fr 260px;gap:48px;align-items:start;}
+  .toc{position:sticky;top:80px;background:var(--dark2);border:1px solid var(--border);padding:22px;}
+  .toc h4{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.22em;color:var(--cyan);text-shadow:var(--glow-c);margin-bottom:16px;text-transform:uppercase;}
+  .toc ul{list-style:none;}
+  .toc li{border-bottom:1px solid var(--border);}
+  .toc a{display:block;padding:9px 0;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);text-decoration:none;letter-spacing:.08em;transition:color .2s,padding-left .2s;}
+  .toc a:hover{color:var(--cyan);padding-left:6px;}
+  .toc .toc-sub a{padding-left:14px;font-size:.65rem;}
+  #progress{position:fixed;top:56px;left:0;height:2px;background:var(--cyan);box-shadow:var(--glow-c);z-index:999;transition:width .1s;width:0;}
+  @media(max-width:900px){.post-layout{grid-template-columns:1fr;}.toc{position:static;}}
+  /* Hide both lang blocks initially; JS will show correct one */
+  [lang-en],[lang-es]{display:none;}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<canvas id="particles"></canvas>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../../index.html" class="nav-logo">THE<em>//</em>VAULT</a>
+    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="../../index.html"><span class="status-dot"></span>HOME</a></li>
+      <li class="bt"><a href="../../blue-team.html">BLUE TEAM</a></li>
+      <li class="rt"><a href="../../red-team.html">RED TEAM</a></li>
+      <li class="rc"><a href="../../recursos.html">RESOURCES</a></li>
+      <li><a href="../../blog.html">BLOG</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrap">
+<div class="wrapper" style="padding-top:48px;padding-bottom:60px;">
+
+  <!-- Breadcrumb -->
+  <div style="font-family:var(--font-mono);font-size:.65rem;letter-spacing:.12em;color:var(--text-dim);margin-bottom:32px;" class="reveal">
+    <a href="../../index.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">HOME</a>
+    <span style="margin:0 10px;color:var(--magenta)"> // </span>
+    <a href="../../blue-team.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">BLUE TEAM</a>
+    <span style="margin:0 10px;color:var(--magenta)"> // </span>
+    <span style="color:var(--cyan)">PYRAMID OF PAIN</span>
+  </div>
+
+  <!-- Post header — bilingual -->
+  <div class="reveal" style="margin-bottom:40px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+      <span class="badge c">BLUE TEAM</span>
+      <span class="badge c">SOC ANALYST</span>
+      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);">2024-08-20</span>
+      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);" lang-en>// 8 MIN READ</span>
+      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);" lang-es>// 8 MIN LECTURA</span>
+    </div>
+    <h1 style="font-family:var(--font-hd);font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:12px;">
+      Pyramid of Pain —
+      <span style="color:var(--cyan);text-shadow:var(--glow-c);" lang-en>IOCs and attacker cost</span>
+      <span style="color:var(--cyan);text-shadow:var(--glow-c);" lang-es>IOCs y coste para el atacante</span>
+    </h1>
+    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-en>
+      Analysis of David Bianco's framework: how to categorise IOCs by the cost it takes the attacker to change them, and how to use it to prioritise SOC detections.
+    </p>
+    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-es>
+      Análisis del framework de David Bianco: cómo categorizar los IOCs según el coste que supone para el atacante cambiarlos, y cómo usarlo para priorizar las detecciones del SOC.
+    </p>
+  </div>
+
+  <div class="post-layout reveal">
+    <article class="post-article" id="post-content">
+
+      <!-- ══════════════════════════════
+           ENGLISH CONTENT
+      ══════════════════════════════ -->
+      <div lang-en>
+        <h2 id="what-en">What is the Pyramid of Pain?</h2>
+        <p>The <strong>Pyramid of Pain</strong>, created by David Bianco in 2013, classifies IOCs into six levels based on the <strong>pain</strong> it causes the attacker to change them when detected and blocked by the defender.</p>
+        <p>The premise is simple: blocking an IP is trivial — the attacker just changes server. But detecting and countering their <strong>TTPs</strong> forces them to completely rethink the operation.</p>
+        <div class="note">The name reflects that the higher you are in the pyramid, the more pain you cause the adversary when you detect and respond to those indicators.</div>
+
+        <h2 id="levels-en">The 6 levels</h2>
+
+        <h3 id="hashes-en">1. Hash Values (trivial)</h3>
+        <p><strong>Cryptographic hashes</strong> (MD5, SHA1, SHA256) are the most basic IOC. An attacker only needs to change one byte to get a different hash.</p>
+        <pre><code># Look up a hash on VirusTotal
+curl "https://www.virustotal.com/api/v3/files/{hash}" \
+  -H "x-apikey: YOUR_API_KEY"</code></pre>
+
+        <h3 id="ips-en">2. IP Addresses (easy)</h3>
+        <p>C2 server IPs are slightly more costly to change, but remain trivial with <strong>fast flux DNS</strong> or cloud infrastructure.</p>
+
+        <h3 id="domains-en">3. Domain Names (simple)</h3>
+        <p>Registering new domains has a time and financial cost. However, with <strong>DGAs</strong> attackers can rotate domains quickly.</p>
+
+        <h3 id="artifacts-en">4. Network/Host Artifacts (annoying)</h3>
+        <p>Artifacts like specific User-Agents, registry paths or traffic patterns require the attacker to modify their tooling — consuming development time.</p>
+        <div class="warn">Detecting host artifacts requires good endpoint visibility via EDR, Sysmon or similar. Without telemetry, this level is hard to monitor.</div>
+
+        <h3 id="tools-en">5. Tools (challenging)</h3>
+        <p>Tools like Mimikatz or Cobalt Strike have <strong>characteristic signatures</strong> very difficult to fully eliminate. Detecting them forces the attacker to develop custom malware — slow and expensive.</p>
+        <pre><code>title: Mimikatz Execution
+status: experimental
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\mimikatz.exe'
+  condition: selection</code></pre>
+
+        <h3 id="ttps-en">6. TTPs (tough)</h3>
+        <p>The attacker's <strong>Tactics, Techniques and Procedures</strong> — mapped in <a href="https://attack.mitre.org" target="_blank">MITRE ATT&CK</a> — are the highest and most valuable level. Changing them requires retraining the entire attack team and overhauling their methodology.</p>
+
+        <h2 id="soc-en">Practical application in the SOC</h2>
+        <p>The Pyramid of Pain helps <strong>prioritise detection investments</strong>:</p>
+        <ul>
+          <li>Don't spend excessive resources reactively blocking IPs or hashes</li>
+          <li>Invest in <strong>behavioural detection</strong> focused on TTPs</li>
+          <li>Use MITRE ATT&CK to map your current detection coverage</li>
+          <li>Build SIEM and EDR rules oriented to detecting actions, not artefacts</li>
+        </ul>
+        <div class="tip">A rule detecting "LSASS process dump" (TTP) is infinitely more durable than one searching for the mimikatz.exe hash.</div>
+
+        <h2 id="conclusion-en">Conclusion</h2>
+        <p>The Pyramid of Pain is a simple but very effective mental tool. Next time you configure a detection rule, ask yourself: <strong>what level of the pyramid am I operating at?</strong></p>
+      </div>
+
+      <!-- ══════════════════════════════
+           CONTENIDO EN ESPAÑOL
+      ══════════════════════════════ -->
+      <div lang-es>
+        <h2 id="what-es">¿Qué es la Pyramid of Pain?</h2>
+        <p>La <strong>Pyramid of Pain</strong>, creada por David Bianco en 2013, clasifica los IOCs en seis niveles según el <strong>dolor</strong> que causa al atacante tener que cambiarlos cuando el defensor los detecta y bloquea.</p>
+        <p>La premisa es simple: bloquear una IP es trivial — el atacante simplemente cambia de servidor. Pero detectar y contrarrestar sus <strong>TTPs</strong> lo obliga a replantear completamente la operación.</p>
+        <div class="note">El nombre refleja que cuanto más arriba estés en la pirámide, más dolor causas al adversario cuando detectas y respondes a esos indicadores.</div>
+
+        <h2 id="levels-es">Los 6 niveles</h2>
+
+        <h3 id="hashes-es">1. Hash Values (trivial)</h3>
+        <p>Los <strong>hashes criptográficos</strong> (MD5, SHA1, SHA256) son el IOC más básico. Un atacante solo necesita cambiar un byte para obtener un hash diferente.</p>
+        <pre><code># Buscar un hash en VirusTotal
+curl "https://www.virustotal.com/api/v3/files/{hash}" \
+  -H "x-apikey: TU_API_KEY"</code></pre>
+
+        <h3 id="ips-es">2. Direcciones IP (fácil)</h3>
+        <p>Las IPs de servidores C2 son algo más costosas de cambiar, pero siguen siendo triviales con <strong>fast flux DNS</strong> o infraestructura cloud.</p>
+
+        <h3 id="domains-es">3. Nombres de dominio (simple)</h3>
+        <p>Registrar nuevos dominios tiene un coste de tiempo y dinero. Sin embargo, con <strong>DGAs</strong> los atacantes pueden rotar dominios rápidamente.</p>
+
+        <h3 id="artifacts-es">4. Artefactos de red/host (molesto)</h3>
+        <p>Artefactos como User-Agents específicos, rutas de registro o patrones de tráfico obligan al atacante a modificar sus herramientas — consumiendo tiempo de desarrollo.</p>
+        <div class="warn">Detectar artefactos de host requiere buena visibilidad de endpoint a través de EDR, Sysmon o similares. Sin telemetría, este nivel es difícil de monitorizar.</div>
+
+        <h3 id="tools-es">5. Herramientas (desafiante)</h3>
+        <p>Herramientas como Mimikatz o Cobalt Strike tienen <strong>firmas características</strong> muy difíciles de eliminar completamente. Detectarlas obliga al atacante a desarrollar malware personalizado — lento y costoso.</p>
+        <pre><code>title: Mimikatz Execution
+status: experimental
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\mimikatz.exe'
+  condition: selection</code></pre>
+
+        <h3 id="ttps-es">6. TTPs (difícil)</h3>
+        <p>Las <strong>Tácticas, Técnicas y Procedimientos</strong> del atacante — mapeadas en <a href="https://attack.mitre.org" target="_blank">MITRE ATT&CK</a> — son el nivel más alto y valioso. Cambiarlos requiere reentrenar a todo el equipo de ataque y reformular su metodología por completo.</p>
+
+        <h2 id="soc-es">Aplicación práctica en el SOC</h2>
+        <p>La Pyramid of Pain ayuda a <strong>priorizar las inversiones en detección</strong>:</p>
+        <ul>
+          <li>No dediques recursos excesivos a bloquear IPs o hashes de forma reactiva</li>
+          <li>Invierte en <strong>detección de comportamiento</strong> enfocada en TTPs</li>
+          <li>Usa MITRE ATT&CK para mapear tu cobertura de detección actual</li>
+          <li>Construye reglas en SIEM y EDR orientadas a detectar acciones, no artefactos</li>
+        </ul>
+        <div class="tip">Una regla que detecta "volcado del proceso LSASS" (TTP) es infinitamente más duradera que una que busca el hash de mimikatz.exe.</div>
+
+        <h2 id="conclusion-es">Conclusión</h2>
+        <p>La Pyramid of Pain es una herramienta mental simple pero muy efectiva. La próxima vez que configures una regla de detección, pregúntate: <strong>¿en qué nivel de la pirámide estoy operando?</strong></p>
+      </div>
+
+      <hr class="divider">
+      <div style="margin-top:32px;">
+        <a href="../../blue-team.html" style="background:var(--dark2);border:1px solid var(--border);padding:14px 22px;text-decoration:none;color:var(--text);font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;transition:border-color .2s,background .2s;display:inline-block;" onmouseover="this.style.borderColor='rgba(0,255,245,.25)';this.style.background='var(--dark3)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--dark2)'" data-back="bt">← BLUE TEAM</a>
+      </div>
+    </article>
+
+    <aside class="toc">
+      <h4 data-i18n="post.toc">// INDEX</h4>
+      <!-- EN index -->
+      <ul lang-en>
+        <li><a href="#what-en">What is the Pyramid of Pain?</a></li>
+        <li><a href="#levels-en">The 6 levels</a></li>
+        <li class="toc-sub"><a href="#hashes-en">1. Hash Values</a></li>
+        <li class="toc-sub"><a href="#ips-en">2. IP Addresses</a></li>
+        <li class="toc-sub"><a href="#domains-en">3. Domain Names</a></li>
+        <li class="toc-sub"><a href="#artifacts-en">4. Artifacts</a></li>
+        <li class="toc-sub"><a href="#tools-en">5. Tools</a></li>
+        <li class="toc-sub"><a href="#ttps-en">6. TTPs</a></li>
+        <li><a href="#soc-en">SOC Application</a></li>
+        <li><a href="#conclusion-en">Conclusion</a></li>
+      </ul>
+      <!-- ES índice -->
+      <ul lang-es>
+        <li><a href="#what-es">¿Qué es la Pyramid of Pain?</a></li>
+        <li><a href="#levels-es">Los 6 niveles</a></li>
+        <li class="toc-sub"><a href="#hashes-es">1. Hash Values</a></li>
+        <li class="toc-sub"><a href="#ips-es">2. Direcciones IP</a></li>
+        <li class="toc-sub"><a href="#domains-es">3. Dominios</a></li>
+        <li class="toc-sub"><a href="#artifacts-es">4. Artefactos</a></li>
+        <li class="toc-sub"><a href="#tools-es">5. Herramientas</a></li>
+        <li class="toc-sub"><a href="#ttps-es">6. TTPs</a></li>
+        <li><a href="#soc-es">Aplicación en el SOC</a></li>
+        <li><a href="#conclusion-es">Conclusión</a></li>
+      </ul>
+    </aside>
+  </div>
+</div>
+
+<footer>
+  <div class="wrapper">
+    <div class="footer-logo">THE//VAULT</div>
+    <ul class="footer-links">
+      <li><a href="https://github.com/stegano5" target="_blank">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/jordi-mr/">LinkedIn</a></li>
+      <li><a href="#">Twitter</a></li>
+    </ul>
+    <p class="footer-copy"><span data-i18n="footer.copy">© 2024 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</span></p>
+  </div>
+</footer>
+</div>
+
+<script src="../../js/vault.js"></script>
+<script src="../../js/i18n.js"></script>
+<script>
+  window.addEventListener('scroll', () => {
+    const el = document.getElementById('post-content');
+    const bar = document.getElementById('progress');
+    if (!el || !bar) return;
+    const total = el.offsetHeight - window.innerHeight;
+    const scrolled = Math.max(0, -el.getBoundingClientRect().top);
+    bar.style.width = Math.min(100, (scrolled / total) * 100) + '%';
+  });
+</script>
+</body>
+</html>
