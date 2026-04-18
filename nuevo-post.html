@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>New Post // The Vault</title>
+<link rel="stylesheet" href="css/vault.css">
+<style>
+  /* ── EDITOR LAYOUT ── */
+  #progress { position:fixed; top:56px; left:0; height:2px; background:var(--cyan); box-shadow:var(--glow-c); z-index:999; transition:width .1s; width:0; }
+
+  .editor-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    height: calc(100vh - 56px);
+    margin-top: 56px;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* ── EDITOR PANEL ── */
+  .editor-panel {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    background: var(--dark2);
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--dark3);
+    flex-shrink: 0;
+  }
+  .panel-title {
+    font-family: var(--font-mono);
+    font-size: .62rem;
+    letter-spacing: .18em;
+    color: var(--cyan);
+    text-shadow: var(--glow-c);
+  }
+  .panel-actions { display: flex; gap: 8px; }
+  .panel-btn {
+    font-family: var(--font-mono);
+    font-size: .6rem;
+    letter-spacing: .12em;
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all .2s;
+    clip-path: polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));
+  }
+  .panel-btn:hover { color: var(--cyan); border-color: var(--cyan); background: rgba(0,255,245,.05); }
+  .panel-btn.danger:hover { color: var(--magenta); border-color: var(--magenta); background: rgba(255,0,170,.05); }
+  .panel-btn.success { color: var(--green); border-color: var(--green); }
+  .panel-btn.success:hover { background: rgba(57,255,20,.05); }
+
+  /* Metadata fields */
+  .meta-fields {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .meta-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .meta-field label {
+    font-family: var(--font-mono);
+    font-size: .55rem;
+    letter-spacing: .15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .meta-field input, .meta-field select {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    padding: 5px 8px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .meta-field input:focus, .meta-field select:focus {
+    border-color: var(--cyan);
+  }
+  .meta-field select option { background: var(--dark2); }
+
+  /* Markdown textarea */
+  #md-input {
+    flex: 1;
+    background: var(--dark);
+    border: none;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    line-height: 1.7;
+    padding: 20px 18px;
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+    tab-size: 2;
+  }
+  #md-input::selection { background: rgba(0,255,245,.15); }
+
+  /* ── PREVIEW PANEL ── */
+  .preview-panel {
+    overflow-y: auto;
+    background: var(--dark);
+  }
+  .preview-panel .panel-header { position: sticky; top: 0; z-index: 10; }
+
+  /* Article styles */
+  .post-article {
+    padding: 28px 32px 60px;
+  }
+  .post-article h1 {
+    font-family: var(--font-hd);
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .post-article h2 {
+    font-family: var(--font-hd);
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--cyan);
+    text-shadow: 0 0 12px rgba(0,255,245,.3);
+    letter-spacing: .08em;
+    margin: 36px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .post-article h3 {
+    font-family: var(--font-hd);
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--magenta);
+    letter-spacing: .08em;
+    margin: 24px 0 10px;
+  }
+  .post-article h4 {
+    font-family: var(--font-mono);
+    font-size: .8rem;
+    color: var(--green);
+    letter-spacing: .1em;
+    margin: 18px 0 8px;
+  }
+  .post-article p { margin-bottom: 14px; font-size: 1rem; line-height: 1.75; color: var(--text); }
+  .post-article ul, .post-article ol { padding-left: 22px; margin-bottom: 14px; }
+  .post-article li { margin-bottom: 6px; color: var(--text); line-height: 1.7; }
+  .post-article strong { color: #fff; font-weight: 700; }
+  .post-article em { color: var(--cyan); font-style: normal; }
+  .post-article a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(0,255,245,.25); transition: border-color .2s; }
+  .post-article a:hover { border-color: var(--cyan); }
+  .post-article code {
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    color: var(--green);
+  }
+  .post-article pre {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan);
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 18px 0;
+    font-family: var(--font-mono);
+    font-size: .77rem;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  .post-article pre code { background: none; border: none; padding: 0; color: inherit; }
+  .post-article blockquote {
+    border-left: 3px solid var(--magenta);
+    background: rgba(255,0,170,.04);
+    padding: 12px 18px;
+    margin: 16px 0;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+  .post-article hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+  .post-article table { width: 100%; border-collapse: collapse; margin: 18px 0; font-family: var(--font-mono); font-size: .78rem; }
+  .post-article th { background: var(--dark2); border: 1px solid var(--border); padding: 8px 12px; color: var(--cyan); text-align: left; letter-spacing: .1em; font-size: .7rem; }
+  .post-article td { border: 1px solid var(--border); padding: 7px 12px; color: var(--text); }
+  .post-article tr:nth-child(even) td { background: rgba(0,255,245,.02); }
+  .post-article .note { background: rgba(0,255,245,.05); border: 1px solid rgba(0,255,245,.18); border-left: 3px solid var(--cyan); padding: 14px 18px; margin: 18px 0; font-size: .9rem; color: var(--text); }
+  .post-article .warn { background: rgba(255,0,170,.05); border: 1px solid rgba(255,0,170,.18); border-left: 3px solid var(--magenta); padding: 14px 18px; margin: 18px 0; font-size: .9rem; color: var(--text); }
+  .post-article .tip { background: rgba(57,255,20,.05); border: 1px solid rgba(57,255,20,.18); border-left: 3px solid var(--green); padding: 14px 18px; margin: 18px 0; font-size: .9rem; color: var(--text); }
+
+  /* ── EXPORT MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(5,8,16,.92);
+    z-index: 9000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    padding: 28px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    clip-path: polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));
+    position: relative;
+  }
+  .modal-title { font-family: var(--font-hd); font-size: 1rem; color: var(--cyan); text-shadow: var(--glow-c); margin-bottom: 16px; }
+  #html-output {
+    width: 100%;
+    min-height: 200px;
+    background: var(--dark);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    padding: 12px;
+    resize: vertical;
+    outline: none;
+    line-height: 1.5;
+    box-sizing: border-box;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:900px) {
+    .editor-wrap { grid-template-columns: 1fr; height: auto; }
+    .editor-panel { height: 60vh; }
+    .preview-panel { min-height: 60vh; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--dark2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0,255,245,.3); }
+
+  /* Preview placeholder */
+  .preview-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: .75rem;
+    gap: 10px;
+    opacity: .6;
+  }
+  .preview-placeholder::before {
+    content: '//';
+    font-size: 2rem;
+    color: var(--border);
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<canvas id="particles"></canvas>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">THE<em>//</em>VAULT</a>
+    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html"><span class="status-dot"></span>HOME</a></li>
+      <li class="bt"><a href="blue-team.html">BLUE TEAM</a></li>
+      <li class="rt"><a href="red-team.html">RED TEAM</a></li>
+      <li class="rc"><a href="recursos.html">RESOURCES</a></li>
+      <li><a href="blog.html">BLOG</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ══ EDITOR ══ -->
+<div class="editor-wrap">
+
+  <!-- LEFT: Markdown input -->
+  <div class="editor-panel">
+    <div class="panel-header">
+      <span class="panel-title">// MARKDOWN EDITOR</span>
+      <div class="panel-actions">
+        <button class="panel-btn" onclick="loadExample()">EXAMPLE</button>
+        <button class="panel-btn danger" onclick="clearEditor()">CLEAR</button>
+      </div>
+    </div>
+
+    <div class="meta-fields">
+      <div class="meta-field">
+        <label>Title</label>
+        <input type="text" id="meta-title" placeholder="Post title...">
+      </div>
+      <div class="meta-field">
+        <label>Category</label>
+        <select id="meta-cat">
+          <option value="blue">BLUE TEAM</option>
+          <option value="red">RED TEAM</option>
+          <option value="ctf">CTF</option>
+          <option value="rec">RESOURCES</option>
+        </select>
+      </div>
+      <div class="meta-field">
+        <label>Date</label>
+        <input type="date" id="meta-date">
+      </div>
+      <div class="meta-field">
+        <label>Reading time</label>
+        <input type="text" id="meta-readtime" placeholder="5 min read">
+      </div>
+      <div class="meta-field" style="grid-column:1/-1;">
+        <label>Short description</label>
+        <input type="text" id="meta-desc" placeholder="One-line summary...">
+      </div>
+    </div>
+
+    <textarea id="md-input" spellcheck="false" placeholder="# Your post in Markdown&#10;&#10;Write here using standard Markdown...&#10;&#10;## Section&#10;&#10;Normal paragraph.&#10;&#10;```bash&#10;command --example&#10;```&#10;&#10;> [!NOTE]&#10;> Info callout&#10;&#10;> [!WARN]&#10;> Warning callout&#10;&#10;> [!TIP]&#10;> Tip callout"></textarea>
+  </div>
+
+  <!-- RIGHT: Preview -->
+  <div class="preview-panel">
+    <div class="panel-header">
+      <span class="panel-title">// PREVIEW — VAULT STYLE</span>
+      <div class="panel-actions">
+        <button class="panel-btn success" onclick="exportHTML()">EXPORT HTML</button>
+      </div>
+    </div>
+
+    <div class="post-article" id="preview">
+      <div class="preview-placeholder">Write Markdown in the editor to see the preview...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PUBLISH MODAL ══ -->
+<div class="modal-overlay" id="export-modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-title">// PUBLISH POST</div>
+
+    <!-- STEP 1: filename -->
+    <div style="margin-bottom:16px;">
+      <label style="font-family:var(--font-mono);font-size:.58rem;letter-spacing:.15em;color:var(--text-dim);display:block;margin-bottom:6px;text-transform:uppercase;">
+        // STEP 1 — Choose filename for the post
+      </label>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);">posts/</span>
+        <span id="modal-catfolder" style="font-family:var(--font-mono);font-size:.7rem;color:var(--magenta);">blue-team/</span>
+        <input id="filename-input" type="text" placeholder="mi-post" style="flex:1;min-width:120px;background:var(--dark);border:1px solid var(--border);color:var(--cyan);font-family:var(--font-mono);font-size:.72rem;padding:5px 8px;outline:none;">
+        <span style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);">.html</span>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:.58rem;color:var(--text-dim);margin-top:4px;">
+        Lowercase with hyphens, no spaces. E.g.: <span style="color:var(--cyan);">kerberoasting-attack</span>
+      </div>
+    </div>
+
+    <!-- STEP 2: HTML output -->
+    <label style="font-family:var(--font-mono);font-size:.58rem;letter-spacing:.15em;color:var(--text-dim);display:block;margin-bottom:6px;text-transform:uppercase;">
+      // STEP 2 — Copy HTML and save the file
+    </label>
+    <textarea id="html-output" readonly onclick="this.select()"></textarea>
+
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+      <button class="panel-btn success" onclick="copyHTML()">COPY HTML</button>
+      <button class="panel-btn" id="btn-publish" onclick="publishPost()" style="color:var(--green);border-color:var(--green);">✓ MARK AS PUBLISHED</button>
+      <button class="panel-btn danger" onclick="document.getElementById('export-modal').classList.remove('open')">CLOSE</button>
+    </div>
+
+    <!-- STEP 3 -->
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);line-height:1.6;">
+      <span style="color:var(--cyan);">// STEP 3 — Upload to GitHub</span><br><br>
+      1. Save the HTML file as <strong id="modal-filepath" style="color:var(--green);">posts/blue-team/mi-post.html</strong><br>
+      2. Upload it to your GitHub repo in that exact path<br>
+      3. Click <strong style="color:var(--green);">✓ MARK AS PUBLISHED</strong> — the post will appear in Blog and Blue/Red Team<br>
+      4. Push to GitHub → it goes live automatically ✅
+    </div>
+  </div>
+</div>
+
+<!-- marked.js MUST load before any script that uses it -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+
+<script>
+// ── WAIT FOR marked TO BE READY ──
+function initEditor() {
+  // CONFIG MARKED
+  marked.setOptions({ breaks: true, gfm: true });
+
+  const renderer = new marked.Renderer();
+
+  renderer.code = (code, lang) => {
+    return `<pre><code>${escapeHtml(typeof code === 'object' ? code.text || '' : code)}</code></pre>`;
+  };
+
+  renderer.blockquote = (quote) => {
+    const raw = typeof quote === 'object' ? (quote.text || '') : quote;
+    const inner = raw.replace(/<\/?p>/g, '').trim();
+    if (inner.startsWith('[!NOTE]')) return `<div class="note">${inner.replace('[!NOTE]', '').trim()}</div>`;
+    if (inner.startsWith('[!WARN]')) return `<div class="warn">${inner.replace('[!WARN]', '').trim()}</div>`;
+    if (inner.startsWith('[!TIP]'))  return `<div class="tip">${inner.replace('[!TIP]', '').trim()}</div>`;
+    return `<blockquote>${inner}</blockquote>`;
+  };
+
+  marked.use({ renderer });
+
+  // Wire up live events
+  document.getElementById('md-input').addEventListener('input', render);
+  ['meta-title','meta-cat','meta-date','meta-readtime','meta-desc'].forEach(id => {
+    document.getElementById(id).addEventListener('input', render);
+  });
+
+  // Set today's date
+  document.getElementById('meta-date').value = new Date().toISOString().split('T')[0];
+
+  // Initial render
+  render();
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── RENDER ──
+function render() {
+  const md    = document.getElementById('md-input').value;
+  const title = document.getElementById('meta-title').value;
+  const cat   = document.getElementById('meta-cat').value;
+  const date  = document.getElementById('meta-date').value;
+  const readtime = document.getElementById('meta-readtime').value;
+  const desc  = document.getElementById('meta-desc').value;
+
+  const catLabels  = { blue:'BLUE TEAM', red:'RED TEAM', ctf:'CTF', rec:'RESOURCES' };
+  const badgeClass = { blue:'c', red:'m', ctf:'c', rec:'g' };
+
+  let header = '';
+  if (title || date || cat) {
+    header = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+        ${cat ? `<span class="badge ${badgeClass[cat]}">${catLabels[cat]}</span>` : ''}
+        ${date ? `<span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;">${date}</span>` : ''}
+        ${readtime ? `<span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);">// ${readtime}</span>` : ''}
+      </div>
+      ${title ? `<h1>${title}</h1>` : ''}
+      ${desc ? `<p style="font-size:1rem;color:var(--text-dim);max-width:650px;line-height:1.75;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--border);">${desc}</p>` : ''}
+    `;
+  }
+
+  const body = md
+    ? marked.parse(md)
+    : '<div class="preview-placeholder">Write Markdown in the editor to see the preview...</div>';
+
+  document.getElementById('preview').innerHTML = header + body;
+}
+
+// ── EXPORT / PUBLISH ──
+const CAT_FOLDER = {blue:'blue-team',red:'red-team',ctf:'ctf',rec:'recursos'};
+const CAT_LABEL  = {blue:'BLUE TEAM',red:'RED TEAM',ctf:'CTF',rec:'RESOURCES'};
+
+function exportHTML() {
+  const title    = document.getElementById('meta-title').value || 'Post';
+  const cat      = document.getElementById('meta-cat').value;
+  const date     = document.getElementById('meta-date').value;
+  const readtime = document.getElementById('meta-readtime').value;
+  const desc     = document.getElementById('meta-desc').value;
+  const md       = document.getElementById('md-input').value;
+  const badgeClass = { blue:'c', red:'m', ctf:'c', rec:'g' };
+  const folder   = CAT_FOLDER[cat] || cat;
+
+  // Update modal folder
+  document.getElementById('modal-catfolder').textContent = folder + '/';
+
+  // Suggest filename
+  const suggestedFile = title.toLowerCase().replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').substring(0,40) || 'mi-post';
+  document.getElementById('filename-input').value = suggestedFile;
+
+  // Generate TOC from headings
+  const headings = [];
+  const hRegex = /^(#{2,3})\s+(.+)$/gm;
+  let m;
+  while ((m = hRegex.exec(md)) !== null) {
+    const level = m[1].length;
+    const text  = m[2];
+    const id    = text.toLowerCase().replace(/[^\w\s]/g,'').replace(/\s+/g,'-');
+    headings.push({ level, text, id });
+  }
+
+  let bodyHtml = marked.parse(md);
+  headings.forEach(h => {
+    const tag = `h${h.level}`;
+    const escaped = h.text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    bodyHtml = bodyHtml.replace(
+      new RegExp(`<${tag}>${escaped}</${tag}>`),
+      `<${tag} id="${h.id}">${h.text}</${tag}>`
+    );
+  });
+
+  const tocHtml = headings.length ? `
+    <aside class="toc">
+      <h4>// INDEX</h4>
+      <ul>
+        ${headings.map(h => `<li${h.level===3?' class="toc-sub"':''}><a href="#${h.id}">${h.text}</a></li>`).join('\n        ')}
+      </ul>
+    </aside>` : '';
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title} // The Vault</title>
+<link rel="stylesheet" href="../../css/vault.css">
+<style>
+  .post-layout{display:grid;grid-template-columns:1fr 260px;gap:48px;align-items:start;}
+  .toc{position:sticky;top:80px;background:var(--dark2);border:1px solid var(--border);padding:22px;}
+  .toc h4{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.22em;color:var(--cyan);text-shadow:var(--glow-c);margin-bottom:16px;text-transform:uppercase;}
+  .toc ul{list-style:none;}
+  .toc li{border-bottom:1px solid var(--border);}
+  .toc a{display:block;padding:9px 0;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);text-decoration:none;letter-spacing:.08em;transition:color .2s,padding-left .2s;}
+  .toc a:hover{color:var(--cyan);padding-left:6px;}
+  .toc .toc-sub a{padding-left:14px;font-size:.65rem;}
+  @media(max-width:900px){.post-layout{grid-template-columns:1fr;}.toc{position:static;}}
+  #progress{position:fixed;top:56px;left:0;height:2px;background:var(--cyan);box-shadow:var(--glow-c);z-index:999;transition:width .1s;width:0;}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<canvas id="particles"></canvas>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../../index.html" class="nav-logo">THE<em>//</em>VAULT</a>
+    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="../../index.html"><span class="status-dot"></span>HOME</a></li>
+      <li class="bt"><a href="../../blue-team.html">BLUE TEAM</a></li>
+      <li class="rt"><a href="../../red-team.html">RED TEAM</a></li>
+      <li class="rc"><a href="../../recursos.html">RESOURCES</a></li>
+      <li><a href="../../blog.html">BLOG</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrap">
+<div class="wrapper" style="padding-top:48px;padding-bottom:60px;">
+
+  <div style="font-family:var(--font-mono);font-size:.65rem;letter-spacing:.12em;color:var(--text-dim);margin-bottom:32px;" class="reveal">
+    <a href="../../index.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">HOME</a>
+    <span style="margin:0 10px;color:var(--magenta)"> // </span>
+    <a href="../../blog.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">BLOG</a>
+    <span style="margin:0 10px;color:var(--magenta)"> // </span>
+    <span style="color:var(--cyan)">${title.toUpperCase()}</span>
+  </div>
+
+  <div class="reveal" style="margin-bottom:40px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+      <span class="badge ${badgeClass[cat]}">${CAT_LABEL[cat]}</span>
+      ${date ? `<span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;">${date}</span>` : ''}
+      ${readtime ? `<span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);">// ${readtime}</span>` : ''}
+    </div>
+    <h1 style="font-family:var(--font-hd);font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:12px;">${title}</h1>
+    ${desc ? `<p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;">${desc}</p>` : ''}
+  </div>
+
+  <div class="post-layout reveal">
+    <article class="post-article" id="post-content">
+${bodyHtml}
+      <hr class="divider">
+      <div style="margin-top:32px;">
+        <a href="../../blog.html" style="background:var(--dark2);border:1px solid var(--border);padding:16px 22px;text-decoration:none;color:var(--text);font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;transition:border-color .2s,background .2s;display:inline-block;" onmouseover="this.style.borderColor='rgba(0,255,245,.25)';this.style.background='var(--dark3)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--dark2)'">← BACK TO BLOG</a>
+      </div>
+    </article>
+    ${tocHtml}
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrapper">
+    <div class="footer-logo">THE//VAULT</div>
+    <ul class="footer-links">
+      <li><a href="https://github.com/ST3G4N05" target="_blank">GitHub</a></li>
+      <li><a href="#">LinkedIn</a></li>
+    </ul>
+    <p class="footer-copy">© 2024 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</p>
+  </div>
+</footer>
+</div>
+
+<script src="../../js/vault.js"><\/script>
+<script src="../../js/i18n.js"><\/script>
+<script>
+  window.addEventListener('scroll', () => {
+    const el = document.getElementById('post-content');
+    const bar = document.getElementById('progress');
+    if (!el || !bar) return;
+    const total = el.offsetHeight - window.innerHeight;
+    const scrolled = Math.max(0, -el.getBoundingClientRect().top);
+    bar.style.width = Math.min(100, (scrolled / total) * 100) + '%';
+  });
+<\/script>
+</body>
+</html>`;
+
+  document.getElementById('html-output').value = html;
+
+  // Update modal filepath display
+  const fn = document.getElementById('filename-input').value || suggestedFile;
+  document.getElementById('modal-filepath').textContent = `posts/${folder}/${fn}.html`;
+
+  // Live update filepath as user types
+  const filenameInput = document.getElementById('filename-input');
+  const oldHandler = filenameInput._pathHandler;
+  if (oldHandler) filenameInput.removeEventListener('input', oldHandler);
+  const newHandler = () => {
+    const f = filenameInput.value || 'mi-post';
+    document.getElementById('modal-filepath').textContent = `posts/${folder}/${f}.html`;
+  };
+  filenameInput._pathHandler = newHandler;
+  filenameInput.addEventListener('input', newHandler);
+
+  document.getElementById('export-modal').classList.add('open');
+  document.getElementById('btn-publish').textContent = '✓ MARK AS PUBLISHED';
+  document.getElementById('btn-publish').disabled = false;
+  document.getElementById('btn-publish').style.opacity = '1';
+}
+
+// ── PUBLISH: save to localStorage ──
+function publishPost() {
+  const title   = document.getElementById('meta-title').value || 'Untitled';
+  const cat     = document.getElementById('meta-cat').value;
+  const date    = document.getElementById('meta-date').value;
+  const desc    = document.getElementById('meta-desc').value;
+  const fn      = document.getElementById('filename-input').value || 'mi-post';
+  const folder  = CAT_FOLDER[cat] || cat;
+  const filePath = `posts/${folder}/${fn}.html`;
+
+  let posts = [];
+  try { posts = JSON.parse(localStorage.getItem('vault_posts') || '[]'); } catch(e){}
+  const exists = posts.findIndex(p => p.file === filePath);
+  const entry  = { title, cat, date, desc, file: filePath, published: new Date().toISOString() };
+  if (exists >= 0) posts[exists] = entry; else posts.push(entry);
+  localStorage.setItem('vault_posts', JSON.stringify(posts));
+
+  localStorage.setItem('vault_last_update', new Date().toLocaleString('en-GB', {
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', hour12:false
+  }).replace(',',''));
+
+  const btn = document.getElementById('btn-publish');
+  btn.textContent = '✅ PUBLISHED — visible in Blog';
+  btn.disabled = true;
+  btn.style.opacity = '.7';
+}
+
+function copyHTML() {
+  const ta = document.getElementById('html-output');
+  ta.select();
+  document.execCommand('copy');
+  const btn = event.currentTarget;
+  const orig = btn.textContent;
+  btn.textContent = '✓ COPIED!';
+  setTimeout(() => btn.textContent = orig, 1500);
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('export-modal')) {
+    document.getElementById('export-modal').classList.remove('open');
+  }
+}
+
+function clearEditor() {
+  if (confirm('Clear all content?')) {
+    document.getElementById('md-input').value = '';
+    document.getElementById('meta-title').value = '';
+    document.getElementById('meta-desc').value = '';
+    document.getElementById('meta-readtime').value = '';
+    render();
+  }
+}
+
+function loadExample() {
+  document.getElementById('meta-title').value = 'Pyramid of Pain — IOCs and attacker cost';
+  document.getElementById('meta-cat').value = 'blue';
+  document.getElementById('meta-date').value = '2024-08-20';
+  document.getElementById('meta-readtime').value = '8 min read';
+  document.getElementById('meta-desc').value = 'Analysis of David Bianco\'s framework: how to categorize IOCs based on the cost it takes the attacker to change them.';
+  document.getElementById('md-input').value = `## What is the Pyramid of Pain?
+
+The **Pyramid of Pain**, created by David Bianco in 2013, classifies IOCs into six levels based on the *pain* it causes the attacker to change them.
+
+> [!NOTE]
+> The higher you are in the pyramid, the more pain you cause the adversary.
+
+## The 6 levels
+
+### 1. Hash Values (trivial)
+
+**Cryptographic hashes** are the most basic IOC. Easy to evade: an attacker only needs to change one byte of the file.
+
+\`\`\`bash
+# Look up hash on VirusTotal
+curl "https://www.virustotal.com/api/v3/files/{hash}" \\
+  -H "x-apikey: YOUR_API_KEY"
+\`\`\`
+
+### 2. IP Addresses (easy)
+
+C2 server IPs are slightly more costly to change, but remain trivial with **fast flux DNS**.
+
+### 3. Domain Names (simple)
+
+Registering and configuring new domains has a time and financial cost. However, with **DGA** attackers can rotate domains quickly.
+
+### 4. Network/Host Artifacts (annoying)
+
+Artifacts like specific User-Agents or registry paths. They require the attacker to modify their tooling.
+
+> [!WARN]
+> Detecting host artifacts requires good endpoint visibility through EDR, Sysmon or similar tools.
+
+### 5. Tools (challenging)
+
+Tools like Mimikatz or Cobalt Strike have **characteristic signatures** very difficult to fully remove.
+
+\`\`\`yaml
+title: Mimikatz Execution
+status: experimental
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\\\\mimikatz.exe'
+  condition: selection
+\`\`\`
+
+### 6. TTPs (tough)
+
+The **Tactics, Techniques and Procedures** mapped in [MITRE ATT&CK](https://attack.mitre.org) are the most valuable level for the defender.
+
+## Practical application in the SOC
+
+The Pyramid of Pain helps to **prioritize detection investments**:
+
+- Don't allocate excessive resources to reactively blocking IPs or hashes
+- Invest in **behavioral detection** focused on TTPs
+- Use MITRE ATT&CK to map your current coverage
+
+> [!TIP]
+> A rule detecting LSASS dump (TTP) is infinitely more durable than one searching for the mimikatz.exe hash.
+
+## Conclusion
+
+The Pyramid of Pain is a simple but highly effective mental tool. Next time you configure a rule, ask yourself: **what level of the pyramid am I operating at?**`;
+  render();
+}
+</script>
+
+<script src="js/vault.js"></script>
+<script src="js/i18n.js"></script>
+<script>
+  // Init editor once marked.js is guaranteed loaded (it's in the head, so safe here)
+  document.addEventListener('DOMContentLoaded', initEditor);
+</script>
+</body>
+</html>

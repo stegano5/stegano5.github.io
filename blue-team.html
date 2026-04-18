@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blue Team // The Vault</title>
+<link rel="stylesheet" href="css/vault.css">
+<style>
+  /* Module cards with topic filter link */
+  .mod-card {
+    background:var(--dark2); border:1px solid var(--border);
+    padding:30px; position:relative; overflow:hidden;
+    transition:all .25s; text-decoration:none; display:block; color:inherit;
+  }
+  .mod-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+    transform:scaleX(0); transition:transform .4s;
+  }
+  .mod-card:hover{background:var(--dark3);border-color:rgba(0,255,245,.28);transform:translateY(-2px);}
+  .mod-card:hover::before{transform:scaleX(1);}
+  .mod-card-tag{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--cyan);}
+  .mod-dot{width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 5px currentColor;flex-shrink:0;}
+  .mod-icon{font-size:2rem;margin-bottom:14px;display:block;}
+  .mod-card h3{font-family:var(--font-hd);font-size:1rem;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:.04em;}
+  .mod-card p{font-size:.88rem;color:var(--text-dim);line-height:1.6;margin-bottom:16px;}
+  .mod-chips{display:flex;flex-wrap:wrap;gap:5px;}
+  .mod-chip{font-family:var(--font-mono);font-size:.57rem;letter-spacing:.1em;padding:2px 9px;border:1px solid var(--cyan);color:var(--cyan);opacity:.55;transition:opacity .2s;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));}
+  .mod-card:hover .mod-chip{opacity:1;}
+  .mod-arrow{position:absolute;bottom:16px;right:16px;font-family:var(--font-mono);font-size:.6rem;color:var(--cyan);opacity:0;transition:opacity .25s;}
+  .mod-card:hover .mod-arrow{opacity:.7;}
+
+  /* Related posts (dynamic + static) */
+  .post-row.hidden{display:none;}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">THE<em>//</em>VAULT</a>
+    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html"><span class="status-dot"></span>HOME</a></li>
+      <li class="bt"><a href="blue-team.html">BLUE TEAM</a></li>
+      <li class="rt"><a href="red-team.html">RED TEAM</a></li>
+      <li class="rc"><a href="recursos.html">RESOURCES</a></li>
+      <li><a href="blog.html">BLOG</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="wrapper">
+
+    <!-- HERO -->
+    <div class="page-hero reveal">
+      <div class="page-hero-bg">BLUE</div>
+      <div class="page-hero-tag cyan"><span data-i18n="bt.hero.tag">DEFENSE // DETECTION // RESPONSE</span></div>
+      <h1>BLUE <span>TEAM</span><br>OPERATIONS</h1>
+      <p><span data-i18n="bt.hero.sub">Techniques and methodologies for active defense, incident analysis, threat monitoring and system hardening.</span></p>
+    </div>
+
+    <!-- MODULES -->
+    <section style="margin-bottom:80px;" class="reveal">
+      <div class="sec-head">
+        <span class="sec-num">01 //</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title"><span data-i18n="bt.sec1.title">AVAILABLE</span> <span data-i18n="bt.sec1.span">MODULES</span></h2>
+      </div>
+      <div class="cards-grid">
+
+        <a href="blog.html?filter=blue#soc" class="mod-card" data-topic="soc">
+          <div class="mod-card-tag"><div class="mod-dot"></div>SOC ANALYST</div>
+          <span class="mod-icon">🔍</span>
+          <h3>SOC ANALYST PATH</h3>
+          <p><span data-i18n="bt.mod.soc.desc">SOC analyst fundamentals: alert triage, incident management, Pyramid of Pain and investigation methodologies.</span></p>
+          <div class="mod-chips"><span class="mod-chip">PYRAMID OF PAIN</span><span class="mod-chip">ALERT TRIAGE</span><span class="mod-chip">IR</span></div>
+          <span class="mod-arrow">→ POSTS</span>
+        </a>
+
+        <a href="blog.html?filter=blue#log" class="mod-card" data-topic="log">
+          <div class="mod-card-tag"><div class="mod-dot"></div>LOG ANALYSIS</div>
+          <span class="mod-icon">📋</span>
+          <h3>LOG ANALYSIS</h3>
+          <p><span data-i18n="bt.mod.log.desc">Forensic analysis of Windows, Linux, firewall and application logs. Anomaly detection and event correlation.</span></p>
+          <div class="mod-chips"><span class="mod-chip">WINDOWS EVENTS</span><span class="mod-chip">SPLUNK / ELK</span><span class="mod-chip">SIGMA RULES</span></div>
+          <span class="mod-arrow">→ POSTS</span>
+        </a>
+
+        <a href="blog.html?filter=blue#threat" class="mod-card" data-topic="threat">
+          <div class="mod-card-tag"><div class="mod-dot"></div>THREAT DETECTION</div>
+          <span class="mod-icon">🎯</span>
+          <h3>THREAT DETECTION</h3>
+          <p><span data-i18n="bt.mod.threat.desc">TTP identification using MITRE ATT&CK, creating detection rules and proactive threat hunting across the network.</span></p>
+          <div class="mod-chips"><span class="mod-chip">MITRE ATT&amp;CK</span><span class="mod-chip">THREAT HUNTING</span><span class="mod-chip">YARA</span></div>
+          <span class="mod-arrow">→ POSTS</span>
+        </a>
+
+        <a href="blog.html?filter=blue#network" class="mod-card" data-topic="network">
+          <div class="mod-card-tag"><div class="mod-dot"></div>NETWORK SECURITY</div>
+          <span class="mod-icon">🌐</span>
+          <h3>NETWORK MONITORING</h3>
+          <p><span data-i18n="bt.mod.net.desc">Network traffic monitoring, packet analysis with Wireshark, C2 detection and analysis of malicious protocols.</span></p>
+          <div class="mod-chips"><span class="mod-chip">WIRESHARK</span><span class="mod-chip">ZEEK / SURICATA</span><span class="mod-chip">PCAP</span></div>
+          <span class="mod-arrow">→ POSTS</span>
+        </a>
+
+        <a href="blog.html?filter=blue#forensics" class="mod-card" data-topic="forensics">
+          <div class="mod-card-tag"><div class="mod-dot"></div>DIGITAL FORENSICS</div>
+          <span class="mod-icon">🧬</span>
+          <h3>DIGITAL FORENSICS</h3>
+          <p><span data-i18n="bt.mod.for.desc">Forensic acquisition and analysis of disk images, RAM, Windows artefacts and activity timelines.</span></p>
+          <div class="mod-chips"><span class="mod-chip">VOLATILITY</span><span class="mod-chip">AUTOPSY</span><span class="mod-chip">MEMORY</span></div>
+          <span class="mod-arrow">→ POSTS</span>
+        </a>
+
+        <a href="blog.html?filter=blue#hardening" class="mod-card" data-topic="hardening">
+          <div class="mod-card-tag"><div class="mod-dot"></div>HARDENING</div>
+          <span class="mod-icon">🔒</span>
+          <h3>SYSTEM HARDENING</h3>
+          <p><span data-i18n="bt.mod.hard.desc">Hardening guides for Windows and Linux, GPO configuration, CIS Benchmarks and attack surface reduction.</span></p>
+          <div class="mod-chips"><span class="mod-chip">CIS BENCHMARKS</span><span class="mod-chip">GPO</span><span class="mod-chip">ZERO TRUST</span></div>
+          <span class="mod-arrow">→ POSTS</span>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- RELATED POSTS (Blue Team) -->
+    <section style="margin-bottom:90px;" class="reveal">
+      <div class="sec-head">
+        <span class="sec-num">02 //</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title"><span data-i18n="bt.sec2.title">BLUE TEAM</span> <span data-i18n="bt.sec2.span">POSTS</span></h2>
+      </div>
+
+      <!-- Dynamic posts from localStorage -->
+      <div id="dynamic-blue-posts" style="display:flex;flex-direction:column;gap:2px;margin-bottom:2px;"></div>
+
+      <!-- Static posts -->
+      <div class="post-list">
+        <a href="posts/blue-team/pyramid-of-pain.html" class="post-row">
+          <span class="post-date">2024-08-20</span>
+          <div><div class="post-ttl">Pyramid of Pain — Mapping IOCs and attacker cost</div><div class="post-sub">Framework analysis: impact of each indicator for the SOC</div></div>
+          <span class="badge c">SOC</span>
+        </a>
+        <a href="posts/blue-team/splunk-spl.html" class="post-row">
+          <span class="post-date">2024-07-20</span>
+          <div><div class="post-ttl">Splunk SPL — Essential queries for SOC analysts</div><div class="post-sub">Search cheatsheet, correlations and automated alerts</div></div>
+          <span class="badge c">LOG ANALYSIS</span>
+        </a>
+        <a href="posts/blue-team/sigma-rules.html" class="post-row">
+          <span class="post-date">2024-06-10</span>
+          <div><div class="post-ttl">Sigma Rules — Creating generic detection rules</div><div class="post-sub">Syntax, SIEM conversion and best practices</div></div>
+          <span class="badge c">DETECTION</span>
+        </a>
+        <a href="posts/blue-team/volatility3.html" class="post-row">
+          <span class="post-date">2024-04-10</span>
+          <div><div class="post-ttl">RAM forensic analysis with Volatility 3</div><div class="post-sub">Extracting processes, connections and memory artefacts</div></div>
+          <span class="badge c">FORENSICS</span>
+        </a>
+      </div>
+
+      <div style="margin-top:20px;display:flex;gap:12px;">
+        <a href="blog.html?filter=blue" class="btn btn-c"><span data-i18n="bt.btn.all">// ALL BLUE TEAM POSTS</span></a>
+        <a href="nuevo-post.html" class="btn btn-g" style="color:var(--green);border-color:var(--green);">+ NEW POST</a>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="wrapper">
+      <div class="footer-logo">THE//VAULT</div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/stegano5" target="_blank">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/jordi-mr/">LinkedIn</a></li>
+        <li><a href="#">Twitter</a></li>
+      </ul>
+      <p class="footer-copy"><span data-i18n="footer.copy">© 2024 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</span></p>
+    </div>
+  </footer>
+</div>
+
+<script src="js/vault.js"></script>
+<script src="js/i18n.js"></script>
+<script>
+  // Load blue-team dynamic posts from localStorage
+  function loadBluePosts() {
+    let posts = [];
+    try { posts = JSON.parse(localStorage.getItem('vault_posts') || '[]'); } catch(e){}
+    const blue = posts.filter(p => p.cat === 'blue');
+    if (!blue.length) return;
+    const container = document.getElementById('dynamic-blue-posts');
+    blue.slice().reverse().forEach(p => {
+      const row = document.createElement('a');
+      row.href = p.file || '#';
+      row.className = 'post-row';
+      row.innerHTML = `
+        <span class="post-date">${p.date}</span>
+        <div><div class="post-ttl">${p.title}</div><div class="post-sub">${p.desc||''}</div></div>
+        <span class="badge c" style="background:rgba(57,255,20,.06);border-color:var(--green);color:var(--green);">NEW</span>`;
+      container.appendChild(row);
+    });
+  }
+  loadBluePosts();
+</script>
+</body>
+</html>
