@@ -14,10 +14,10 @@ const TRANSLATIONS = {
   'nav.redteam':      { es: 'EQUIPO ROJO', en: 'RED TEAM' },
   'nav.resources':    { es: 'RECURSOS',    en: 'RESOURCES' },
   'nav.blog':         { es: 'BLOG',        en: 'BLOG' },
-  'footer.copy':      { es: '© 2024 MUNCHK1N // ST3G4N05 — BASE DE CONOCIMIENTO DEF/OFENSIVA', en: '© 2024 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE' },
+  'footer.copy':      { es: '© 2024 MUNCHK1N // ST3G4N05 — BASE DE CONOCIMIENTO DEF/OFENSIVA', en: '© 2026 N0xBUTCH3R // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE' },
 
   /* ─── INDEX ─── */
-  'index.hero.tag':   { es: 'ST3G4N05 // MUNCHK1N // OPS CYBER', en: 'ST3G4N05 // MUNCHK1N // CYBER OPS' },
+  'index.hero.tag':   { es: '<span>ST3G4N05 // JORDI MURU a.k.a N0xButch3r // INCIDENT RESPONSE</span>', en: '<span>ST3G4N05 // ST3G4N05 // JORDI MURU a.k.a N0xButch3r // INCIDENT</span>' },
   'index.hero.sub':   { es: 'Base de datos de seguridad ofensiva y defensiva. Técnicas, herramientas y recursos para Blue Team, Red Team y más allá.', en: 'Offensive and defensive security knowledge base. Techniques, tools and resources for Blue Team, Red Team and beyond.' },
   'index.btn.enter':  { es: '// ACCEDER AL VAULT', en: '// ENTER THE VAULT' },
   'index.btn.blog':   { es: '// VER WRITEUPS',     en: '// VIEW WRITEUPS' },
