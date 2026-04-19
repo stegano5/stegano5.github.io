@@ -66,7 +66,8 @@ const TRANSLATIONS = {
   'bt.hero.tag':      { es: 'DEFENSA // DETECCIÓN // RESPUESTA', en: 'DEFENSE // DETECTION // RESPONSE' },
   'bt.hero.h1':       { es: 'OPERACIONES', en: 'OPERATIONS' },
   'bt.hero.sub':      { es: 'Técnicas y metodologías para la defensa activa, análisis de incidentes, monitorización de amenazas y bastionado de sistemas.', en: 'Techniques and methodologies for active defense, incident analysis, threat monitoring and system hardening.' },
-  'bt.sec1.title':    { es: 'MÓDULOS DISPONIBLES', en: 'AVAILABLE MODULES' },
+  /*'bt.sec1.title':    { es: 'MÓDULOS DISPONIBLES', en: 'AVAILABLE MODULES' },*/
+  'bt.sec1.title':    { es: 'MÓDULOS', en: 'AVAILABLE' },
   'bt.sec1.span':     { es: 'DISPONIBLES', en: 'MODULES' },
   'bt.sec2.title':    { es: 'POSTS BLUE TEAM', en: 'BLUE TEAM POSTS' },
   'bt.sec2.span':     { es: 'POSTS', en: 'POSTS' },
