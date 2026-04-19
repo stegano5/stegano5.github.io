@@ -69,8 +69,9 @@ const TRANSLATIONS = {
   /*'bt.sec1.title':    { es: 'MÓDULOS DISPONIBLES', en: 'AVAILABLE MODULES' },*/
   'bt.sec1.title':    { es: 'MÓDULOS', en: 'AVAILABLE' },
   'bt.sec1.span':     { es: 'DISPONIBLES', en: 'MODULES' },
-  'bt.sec2.title':    { es: 'POSTS BLUE TEAM', en: 'BLUE TEAM POSTS' },
-  'bt.sec2.span':     { es: 'POSTS', en: 'POSTS' },
+  /*'bt.sec2.title':    { es: 'POSTS BLUE TEAM', en: 'BLUE TEAM POSTS' },*/
+  'bt.sec2.title':    { es: 'POSTS', en: 'POSTS'},
+  'bt.sec2.span':     { es: 'BLUE TEAM', en: 'BLUE TEAM' },
   'bt.btn.all':       { es: '// TODOS LOS POSTS BLUE TEAM', en: '// ALL BLUE TEAM POSTS' },
   'bt.mod.soc.tag':   { es: 'ANALISTA SOC', en: 'SOC ANALYST' },
   'bt.mod.soc.title': { es: 'RUTA ANALISTA SOC', en: 'SOC ANALYST PATH' },
