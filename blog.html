@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blog // The Vault</title>
+<link rel="stylesheet" href="css/vault.css">
+<style>
+  .blog-top-bar { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:24px; }
+  .filter-bar { display:flex; gap:8px; flex-wrap:wrap; }
+  .filter-btn {
+    font-family:var(--font-mono); font-size:.65rem; letter-spacing:.14em;
+    padding:7px 16px; background:transparent; border:1px solid var(--border);
+    color:var(--text-dim); cursor:pointer; text-transform:uppercase; transition:all .2s;
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+  }
+  .filter-btn:hover,.filter-btn.active{color:var(--cyan);border-color:var(--cyan);background:rgba(0,255,245,.05);text-shadow:var(--glow-c);}
+  .filter-btn.active-m{color:var(--magenta);border-color:var(--magenta);background:rgba(255,0,170,.05);}
+  .filter-btn.active-g{color:var(--green);border-color:var(--green);background:rgba(57,255,20,.05);}
+  .post-row.hidden{display:none;}
+
+  .btn-new-post {
+    font-family:var(--font-mono); font-size:.65rem; letter-spacing:.16em;
+    padding:8px 20px; background:transparent; color:var(--green);
+    border:1px solid var(--green); box-shadow:0 0 8px rgba(57,255,20,.2);
+    cursor:pointer; text-decoration:none; display:inline-flex; align-items:center;
+    gap:8px; text-transform:uppercase; transition:all .2s; white-space:nowrap;
+    clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+  }
+  .btn-new-post:hover{background:rgba(57,255,20,.08);box-shadow:0 0 16px rgba(57,255,20,.4);color:#fff;}
+  .btn-new-post::before{content:'+';font-size:.9rem;line-height:1;}
+
+  #dynamic-posts{display:flex;flex-direction:column;gap:2px;}
+  .dynamic-sep {
+    font-family:var(--font-mono); font-size:.58rem; letter-spacing:.2em;
+    color:var(--green); text-shadow:0 0 6px rgba(57,255,20,.4);
+    padding:10px 0 6px; display:flex; align-items:center; gap:10px;
+  }
+  .dynamic-sep::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(57,255,20,.3),transparent);}
+  .dyn-count{font-size:.5rem;padding:2px 7px;border:1px solid var(--green);color:var(--green);}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">THE<em>//</em>VAULT</a>
+    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html"><span class="status-dot"></span>HOME</a></li>
+      <li class="bt"><a href="blue-team.html">BLUE TEAM</a></li>
+      <li class="rt"><a href="red-team.html">RED TEAM</a></li>
+      <li class="rc"><a href="recursos.html">RESOURCES</a></li>
+      <li><a href="blog.html">BLOG</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="wrapper">
+    <div class="page-hero reveal">
+      <div class="page-hero-bg">BLOG</div>
+      <div class="page-hero-tag cyan"><span data-i18n="blog.hero.tag">WRITEUPS // ANALYSIS // TUTORIALS</span></div>
+      <h1>WRITE<span>UPS</span> &amp;<br>POSTS</h1>
+      <p><span data-i18n="blog.hero.sub">CTF writeups, technique analysis, step-by-step tutorials and field notes from real security operations.</span></p>
+    </div>
+
+    <section class="reveal" style="margin-bottom:80px;">
+      <div class="sec-head">
+        <span class="sec-num">// </span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title"><span data-i18n="blog.sec.title">ALL </span><span data-i18n="blog.sec.span">POSTS</span></h2>
+      </div>
+
+      <div class="blog-top-bar">
+        <div class="filter-bar">
+          <button class="filter-btn active" data-filter="all"><span data-i18n="blog.all">// ALL</span></button>
+          <button class="filter-btn" data-filter="blue"><span data-i18n="blog.filter.blue">// BLUE TEAM</span></button>
+          <button class="filter-btn" data-filter="red"><span data-i18n="blog.filter.red">// RED TEAM</span></button>
+          <button class="filter-btn" data-filter="rec"><span data-i18n="blog.filter.rec">// RESOURCES</span></button>
+          <button class="filter-btn" data-filter="ctf">// CTF</button>
+        </div>
+        <a href="nuevo-post.html" class="btn-new-post"><span data-i18n="blog.newpost">NEW POST</span></a>
+      </div>
+
+      <!-- Posts — cargados automáticamente desde posts/index.json + localStorage -->
+      <div class="post-list" id="all-posts-list"></div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="wrapper">
+      <div class="footer-logo">THE//VAULT</div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/stegano5" target="_blank">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/jordi-mr/">LinkedIn</a></li>
+        <li><a href="#">Twitter</a></li>
+      </ul>
+      <p class="footer-copy"><span data-i18n="footer.copy">© 2024 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</span></p>
+    </div>
+  </footer>
+</div>
+
+<script src="js/vault.js"></script>
+<script src="js/posts.js"></script>
+<script src="js/i18n.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    VaultPosts.renderBlog('all-posts-list');
+  });
+</script>
+</body>
+</html>

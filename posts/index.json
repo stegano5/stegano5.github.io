@@ -1,0 +1,82 @@
+[
+  {
+    "title": "Pyramid of Pain — Mapping IOCs and attacker cost",
+    "desc": "Framework analysis to understand the impact of each indicator",
+    "cat": "blue",
+    "date": "2024-08-20",
+    "file": "posts/blue-team/pyramid-of-pain.html",
+    "published": "2024-08-20T00:00:00.000Z"
+  },
+  {
+    "title": "Privilege Escalation on Linux — SUID, cron jobs and capabilities",
+    "desc": "Systematic enumeration and exploitation of escalation vectors",
+    "cat": "red",
+    "date": "2024-08-05",
+    "file": "posts/red-team/privesc-linux.html",
+    "published": "2024-08-05T00:00:00.000Z"
+  },
+  {
+    "title": "Splunk SPL — Essential queries for SOC analysts",
+    "desc": "Search cheatsheet, correlations and automated alerts",
+    "cat": "blue",
+    "date": "2024-07-20",
+    "file": "posts/blue-team/splunk-spl.html",
+    "published": "2024-07-20T00:00:00.000Z"
+  },
+  {
+    "title": "CTF Writeup — HackTheBox: Forest (Active Directory)",
+    "desc": "Kerberoasting, AS-REP Roasting and DCSync to compromise the DC",
+    "cat": "ctf",
+    "date": "2024-07-10",
+    "file": "posts/ctf/htb-forest.html",
+    "published": "2024-07-10T00:00:00.000Z"
+  },
+  {
+    "title": "Active Directory Attacks — Kerberoasting and Pass-the-Hash",
+    "desc": "Compromising Active Directory environments from the inside",
+    "cat": "red",
+    "date": "2024-06-25",
+    "file": "posts/red-team/ad-attacks.html",
+    "published": "2024-06-25T00:00:00.000Z"
+  },
+  {
+    "title": "Sigma Rules — Creating generic detection rules",
+    "desc": "Syntax, SIEM conversion and best practices",
+    "cat": "blue",
+    "date": "2024-06-10",
+    "file": "posts/blue-team/sigma-rules.html",
+    "published": "2024-06-10T00:00:00.000Z"
+  },
+  {
+    "title": "OSINT tools arsenal — Best options in 2024",
+    "desc": "Passive and active gathering for external reconnaissance",
+    "cat": "rec",
+    "date": "2024-05-30",
+    "file": "posts/recursos/osint-tools.html",
+    "published": "2024-05-30T00:00:00.000Z"
+  },
+  {
+    "title": "AMSI Bypass — Techniques to evade Windows antimalware",
+    "desc": "Memory patching, reflection and PowerShell script obfuscation",
+    "cat": "red",
+    "date": "2024-05-15",
+    "file": "posts/red-team/amsi-bypass.html",
+    "published": "2024-05-15T00:00:00.000Z"
+  },
+  {
+    "title": "CTF Writeup — TryHackMe: Advent of Cyber (Selection)",
+    "desc": "Web exploitation, log analysis and digital forensics",
+    "cat": "ctf",
+    "date": "2024-05-01",
+    "file": "posts/ctf/thm-advent.html",
+    "published": "2024-05-01T00:00:00.000Z"
+  },
+  {
+    "title": "RAM forensic analysis with Volatility 3",
+    "desc": "Extracting processes, network connections and artifacts",
+    "cat": "blue",
+    "date": "2024-04-10",
+    "file": "posts/blue-team/volatility3.html",
+    "published": "2024-04-10T00:00:00.000Z"
+  }
+]
