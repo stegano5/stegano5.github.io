@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resources // The Vault</title>
+<link rel="stylesheet" href="css/vault.css">
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">THE<em>//</em>VAULT</a>
+    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html"><span class="status-dot"></span>HOME</a></li>
+      <li class="bt"><a href="blue-team.html">BLUE TEAM</a></li>
+      <li class="rt"><a href="red-team.html">RED TEAM</a></li>
+      <li class="rc"><a href="recursos.html">RESOURCES</a></li>
+      <li><a href="blog.html">BLOG</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="wrapper">
+    <div class="page-hero reveal">
+      <div class="page-hero-bg" style="-webkit-text-stroke-color:rgba(57,255,20,0.04)">TOOLS</div>
+      <div class="page-hero-tag green"><span data-i18n="rc.hero.tag">ARSENAL // TOOLS // CHEATSHEETS</span></div>
+      <h1><span data-i18n="rc.hero.h1a">ARSENAL</span> &amp;<br><span data-i18n="rc.hero.h1b">RESOURCES</span></h1>
+      <p><span data-i18n="rc.hero.sub">Curated tools, cheatsheets, wordlists and quick references for offensive and defensive cybersecurity operations.</span></p>
+    </div>
+
+    <!-- TERMINAL -->
+    <div class="reveal" style="margin-bottom:70px;">
+      <div class="terminal" style="max-width:700px;">
+        <div class="terminal-bar">
+          <div class="tb-dot r"></div><div class="tb-dot y"></div><div class="tb-dot g"></div>
+          <span class="tb-title">arsenal@vault:~$ — resource locator</span>
+        </div>
+        <div class="terminal-body">
+          <span style="display:block"><span class="t-prompt">vault@arsenal</span><span class="t-cmd">:~$ </span><span class="t-cmd">ls ./tools/</span></span>
+          <span style="display:block;color:var(--cyan)">  recon/  &nbsp; exploitation/  &nbsp; post-exp/  &nbsp; dfir/  &nbsp; cheatsheets/</span>
+          <span style="display:block"><span class="t-prompt">vault@arsenal</span><span class="t-cmd">:~$ </span><span class="t-cmd">cat tools/index.json | grep category</span></span>
+          <span style="display:block;color:var(--text-dim)">  <span class="t-g">[+]</span> 12 categories  &nbsp; <span class="t-g">[+]</span> 47 tools  &nbsp; <span class="t-g">[+]</span> 23 cheatsheets</span>
+          <span style="display:block"><span class="t-prompt">vault@arsenal</span><span class="t-cmd">:~$ </span><span id="typed-cmd" data-text="./load_arsenal.sh --all"></span><span class="cursor"></span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHEATSHEETS -->
+    <section style="margin-bottom:90px;" class="reveal">
+      <div class="sec-head">
+        <span class="sec-num">01 //</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title">CHEAT<span style="color:var(--green);text-shadow:var(--glow-g);"><span data-i18n="rc.sec1.span">SHEETS</span></span></h2>
+      </div>
+      <div class="cards-grid">
+        <a href="post-ejemplo.html" class="card rc">
+          <div class="card-tag g"><div class="tag-dot"></div>LINUX</div>
+          <span class="card-icon">🐧</span>
+          <h3><span data-i18n="rc.mod.linux.title">LINUX COMMANDS</span></h3>
+          <p><span data-i18n="rc.mod.linux.desc">Essential Linux commands for pentesters: navigation, permissions, network, processes, file search and useful one-liners.</span></p>
+          <div class="chip-list"><span class="chip g">BASH</span><span class="chip g">NETWORKING</span><span class="chip g">FILE OPS</span></div>
+        </a>
+        <a href="post-ejemplo.html" class="card rc">
+          <div class="card-tag g"><div class="tag-dot"></div>WINDOWS</div>
+          <span class="card-icon">🪟</span>
+          <h3><span data-i18n="rc.mod.win.title">WINDOWS CMD / PS</span></h3>
+          <p><span data-i18n="rc.mod.win.desc">CMD and PowerShell commands for internal recon, user management, services and Windows/AD environment enumeration.</span></p>
+          <div class="chip-list"><span class="chip g">CMD</span><span class="chip g">POWERSHELL</span><span class="chip g">WMI</span></div>
+        </a>
+        <a href="post-ejemplo.html" class="card rc">
+          <div class="card-tag g"><div class="tag-dot"></div>NETWORKING</div>
+          <span class="card-icon">🌐</span>
+          <h3><span data-i18n="rc.mod.net.title">NETWORK CHEATSHEET</span></h3>
+          <p><span data-i18n="rc.mod.net.desc">Network tools: nmap, netcat, tcpdump, iptables, ss, dig and more. With usage examples and most common flags.</span></p>
+          <div class="chip-list"><span class="chip g">NMAP</span><span class="chip g">NETCAT</span><span class="chip g">TCPDUMP</span></div>
+        </a>
+        <a href="post-ejemplo.html" class="card rc">
+          <div class="card-tag g"><div class="tag-dot"></div>WEB HACKING</div>
+          <span class="card-icon">🕸️</span>
+          <h3><span data-i18n="rc.mod.web.title">WEB EXPLOITATION</span></h3>
+          <p><span data-i18n="rc.mod.web.desc">SQLi, XSS, SSRF, XXE, LFI/RFI and SSTI payloads. Quick reference for web application and API testing.</span></p>
+          <div class="chip-list"><span class="chip g">SQLI</span><span class="chip g">XSS</span><span class="chip g">SSRF</span><span class="chip g">XXE</span></div>
+        </a>
+        <a href="post-ejemplo.html" class="card rc">
+          <div class="card-tag g"><div class="tag-dot"></div>REVERSE SHELLS</div>
+          <span class="card-icon">🔁</span>
+          <h3><span data-i18n="rc.mod.revshell.title">REVERSE SHELLS</span></h3>
+          <p><span data-i18n="rc.mod.revshell.desc">Collection of reverse shells in bash, Python, PHP, Perl, PowerShell and more. Includes one-liners and stabilized shells.</span></p>
+          <div class="chip-list"><span class="chip g">BASH</span><span class="chip g">PYTHON</span><span class="chip g">PHP</span><span class="chip g">POWERSHELL</span></div>
+        </a>
+        <a href="post-ejemplo.html" class="card rc">
+          <div class="card-tag g"><div class="tag-dot"></div>WORDLISTS</div>
+          <span class="card-icon">📚</span>
+          <h3><span data-i18n="rc.mod.wordlists.title">WORDLISTS &amp; ROCKYOU</span></h3>
+          <p><span data-i18n="rc.mod.wordlists.desc">Best wordlists for brute force and fuzzing: SecLists, RockYou, dirbuster. How to generate them and when to use them.</span></p>
+          <div class="chip-list"><span class="chip g">SECLISTS</span><span class="chip g">ROCKYOU</span><span class="chip g">FFUF</span><span class="chip g">HYDRA</span></div>
+        </a>
+      </div>
+    </section>
+
+    <!-- TOOLS TABLE -->
+    <section style="margin-bottom:90px;" class="reveal">
+      <div class="sec-head">
+        <span class="sec-num">02 //</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title"><span data-i18n="rc.sec2.title">ESSENTIAL</span> <span style="color:var(--green);text-shadow:var(--glow-g);"><span data-i18n="rc.sec2.span">TOOLS</span></span></h2>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:.75rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);">
+              <th style="text-align:left;padding:12px 16px;color:var(--cyan);letter-spacing:.15em;font-weight:400;"><span data-i18n="rc.tbl.tool">TOOL</span></th>
+              <th style="text-align:left;padding:12px 16px;color:var(--cyan);letter-spacing:.15em;font-weight:400;"><span data-i18n="rc.tbl.cat">CATEGORY</span></th>
+              <th style="text-align:left;padding:12px 16px;color:var(--cyan);letter-spacing:.15em;font-weight:400;"><span data-i18n="rc.tbl.use">USE</span></th>
+              <th style="text-align:left;padding:12px 16px;color:var(--cyan);letter-spacing:.15em;font-weight:400;">OS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);transition:background .2s;" onmouseover="this.style.background='var(--dark3)'" onmouseout="this.style.background=''">
+              <td style="padding:12px 16px;color:#fff;">Nmap</td>
+              <td style="padding:12px 16px;"><span class="badge c">RECON</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);"><span data-i18n="rc.tbl.nmap">Port scanning and service detection</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);">Win / Linux / Mac</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);transition:background .2s;" onmouseover="this.style.background='var(--dark3)'" onmouseout="this.style.background=''">
+              <td style="padding:12px 16px;color:#fff;">Burp Suite</td>
+              <td style="padding:12px 16px;"><span class="badge m">WEB</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);"><span data-i18n="rc.tbl.burp">HTTP traffic interception and manipulation</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);">Win / Linux / Mac</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);transition:background .2s;" onmouseover="this.style.background='var(--dark3)'" onmouseout="this.style.background=''">
+              <td style="padding:12px 16px;color:#fff;">Metasploit</td>
+              <td style="padding:12px 16px;"><span class="badge m">EXPLOIT</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);"><span data-i18n="rc.tbl.msf">Vulnerability exploitation framework</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);">Linux / Win</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);transition:background .2s;" onmouseover="this.style.background='var(--dark3)'" onmouseout="this.style.background=''">
+              <td style="padding:12px 16px;color:#fff;">BloodHound</td>
+              <td style="padding:12px 16px;"><span class="badge m">AD ATTACKS</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);"><span data-i18n="rc.tbl.bh">Attack path analysis in Active Directory</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);">Win / Linux</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);transition:background .2s;" onmouseover="this.style.background='var(--dark3)'" onmouseout="this.style.background=''">
+              <td style="padding:12px 16px;color:#fff;">Volatility 3</td>
+              <td style="padding:12px 16px;"><span class="badge c">FORENSICS</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);"><span data-i18n="rc.tbl.vol">Forensic analysis of RAM memory dumps</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);">Linux / Win</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);transition:background .2s;" onmouseover="this.style.background='var(--dark3)'" onmouseout="this.style.background=''">
+              <td style="padding:12px 16px;color:#fff;">Wireshark</td>
+              <td style="padding:12px 16px;"><span class="badge c">NETWORK</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);"><span data-i18n="rc.tbl.ws">Network traffic capture and analysis</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);">Win / Linux / Mac</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);transition:background .2s;" onmouseover="this.style.background='var(--dark3)'" onmouseout="this.style.background=''">
+              <td style="padding:12px 16px;color:#fff;">ffuf</td>
+              <td style="padding:12px 16px;"><span class="badge g">FUZZING</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);"><span data-i18n="rc.tbl.ffuf">Ultra-fast web fuzzer for directories and parameters</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);">Linux / Win</td>
+            </tr>
+            <tr style="transition:background .2s;" onmouseover="this.style.background='var(--dark3)'" onmouseout="this.style.background=''">
+              <td style="padding:12px 16px;color:#fff;">Impacket</td>
+              <td style="padding:12px 16px;"><span class="badge m">AD ATTACKS</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);"><span data-i18n="rc.tbl.imp">Python suite for SMB/Kerberos protocol attacks</span></td>
+              <td style="padding:12px 16px;color:var(--text-dim);">Linux</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- POSTS RECURSOS — auto desde posts/index.json + localStorage -->
+    <section style="margin-bottom:90px;" class="reveal">
+      <div class="sec-head">
+        <span class="sec-num">03 //</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title"><span data-i18n="rc.sec3.title">POSTS</span> <span style="color:var(--green);text-shadow:var(--glow-g);"><span data-i18n="rc.sec3.span">RECURSOS</span></span></h2>
+      </div>
+      <div class="post-list" id="rec-posts-list"></div>
+      <div style="margin-top:20px;display:flex;gap:12px;">
+        <a href="blog.html?filter=rec" class="btn btn-g" style="color:var(--green);border-color:var(--green);"><span data-i18n="rc.btn.all">// ALL RESOURCE POSTS</span></a>
+        <a href="nuevo-post.html" class="btn btn-g" style="color:var(--green);border-color:var(--green);opacity:.7;">+ <span data-i18n="blog.newpost">NEW POST</span></a>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="wrapper">
+      <div class="footer-logo">THE//VAULT</div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/ST3G4N05" target="_blank">GitHub</a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">Twitter</a></li>
+      </ul>
+      <p class="footer-copy"><span data-i18n="footer.copy">© 2024 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</span></p>
+    </div>
+  </footer>
+</div>
+
+<script src="js/vault.js"></script>
+<script src="js/posts.js"></script>
+<script src="js/i18n.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    VaultPosts.render('rec-posts-list', 'rec');
+  });
+</script>
+</body>
+</html>
