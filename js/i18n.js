@@ -17,7 +17,7 @@ const TRANSLATIONS = {
   'footer.copy':      { es: '© 2026 N0xBUTCH3R // ST3G4N05 // JMuRu — BASE DE CONOCIMIENTO DEF/OFENSIVA', en: '© 2026 N0xBUTCH3R // ST3G4N05 // JMuRu — A VAULT OF DEF/OFFENSIVE KNOWLEDGE' },
 
   /* ─── INDEX ─── */
-  'index.hero.tag':   { es: '<span>ST3G4N05 // JORDI MURU a.k.a N0xButch3r // INCIDENT RESPONSE</span>', en: '<span>ST3G4N05 // ST3G4N05 // JORDI MURU a.k.a N0xButch3r // INCIDENT</span>' },
+  'index.hero.tag':   { es: '<span>ST3G4N05 // JORDI MURU a.k.a N0xButch3r // INCIDENT RESPONSE</span>', en: '<span>ST3G4N05 // JORDI MURU a.k.a N0xButch3r // INCIDENT</span>' },
   'index.hero.sub':   { es: 'Base de datos de seguridad ofensiva y defensiva. Técnicas, herramientas y recursos para Blue Team, Red Team y más allá.', en: 'Offensive and defensive security knowledge base. Techniques, tools and resources for Blue Team, Red Team and beyond.' },
   'index.btn.enter':  { es: '// ACCEDER AL VAULT', en: '// ENTER THE VAULT' },
   'index.btn.blog':   { es: '// VER WRITEUPS',     en: '// VIEW WRITEUPS' },
