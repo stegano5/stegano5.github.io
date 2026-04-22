@@ -319,7 +319,7 @@ nav {
    FOOTER
 ═══════════════════════════ */
 footer {
-  border-top:1px solid var(--border); padding:40px 0; text-align:center;*/  /*Sin las barras diferentes*/  
+  /*border-top:1px solid var(--border); padding:40px 0; text-align:center;*/   
   border-top:1px solid rgba(255,0,170,0.4); box-shadow:0 -1px 20px rgba(255,0,170,0.12); padding:40px 0; text-align:center;
   margin-top:80px; position:relative; z-index:10;
   .footer-logo em { color: var(--magenta); font-style: normal; text-shadow: var(--glow-m); } 
