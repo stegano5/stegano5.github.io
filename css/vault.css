@@ -380,3 +380,58 @@ footer {
   .cards-grid { grid-template-columns:1fr; }
   .page-hero h1 { font-size:2rem; }
 }
+
+/* ---TABLES FOR POSTS--*/ 
+.post-article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 22px 0 34px;
+  background: rgba(0, 255, 245, 0.025);
+  border: 1px solid rgba(0, 255, 245, 0.16);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
+.post-article thead {
+  background: rgba(0, 255, 245, 0.06);
+}
+
+.post-article th {
+  padding: 14px 16px;
+  text-align: left;
+  color: var(--cyan);
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  border-bottom: 1px solid rgba(0, 255, 245, 0.18);
+}
+
+.post-article td {
+  padding: 13px 16px;
+  border-bottom: 1px solid rgba(0, 255, 245, 0.12);
+  border-right: 1px solid rgba(0, 255, 245, 0.10);
+  vertical-align: top;
+}
+
+.post-article td:last-child,
+.post-article th:last-child {
+  border-right: none;
+}
+
+.post-article tr:nth-child(even) {
+  background: rgba(0, 255, 245, 0.025);
+}
+
+.post-article tr:hover {
+  background: rgba(0, 255, 245, 0.055);
+}
+
+/*--TABLES FOR RESPOSNIVE MOBILEPH ---*/ 
+@media (max-width: 700px) {
+  .post-article table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
