@@ -62,7 +62,9 @@
 
   <div class="post-layout">
     <article class="post-article" id="post-content">
-<h2 id="-montando-un-laboratorio-seguro-para-anlisis-de-malware-con-remnux-flarevm">🧪 Montando un laboratorio seguro para análisis de malware con REMnux + FLARE-VM</h2>
+
+<div lang-es>
+<h2 id="intro-es">🧪 Montando un laboratorio seguro para análisis de malware con REMnux + FLARE-VM</h2>
 <div class="note"><br>Tiempo estimado de lectura: 6–8 min</div><p>Antes de ejecutar una muestra de malware, lo primero no son las herramientas, ni los debuggers, ni los scripts. </p>
 <p>Lo primero es el <strong>aislamiento</strong>.</p>
 <p>Un laboratorio de análisis de malware debe estar diseñado para observar el comportamiento de una muestra sin permitir que esta afecte al host físico, contacte con infraestructura real o alcance la red local.</p>
@@ -497,15 +499,304 @@ nslookup test.local</code></pre><h2 id="eso-es-todo-por-el-momento-recapitulemos
 <li>Restaurar el entorno rápidamente si la cosa se tuerce.</li>
 <li>Documentar todos los resultados de forma consistente.</li>
 </ul>
-<div class="warn"><br>Sobretodo: No ejecutar malware en un entorno que no estés dispuesto a perder.</div><div class="tip"><br>El snapshot es tu punto de retorno y nuestro mayor aliado.<br>El aislamiento va a ser tu primera defensa.</div><h2 id="tags">Tags</h2>
+<div class="warn"><br>Sobretodo: No ejecutar malware en un entorno que no estés dispuesto a perder.</div><div class="tip"><br>El snapshot es tu punto de retorno y nuestro mayor aliado.<br>El aislamiento va a ser tu primera defensa.</div><h2 id="tags-es">Tags</h2>
 <p><code>#MalwareAnalysis</code> <code>#ReverseEngineering</code> <code>#REMnux</code> <code>#FLAREVM</code> <code>#CyberSecurity</code> <code>#BlueTeam</code> <code>#ThreatResearch</code> <code>#DFIR</code> <code>#VirtualBox</code> <code>#INetSim</code> <code>#MalwareLab</code></p>
+</div><!-- end lang-es -->
+
+<div lang-en>
+<h2 id="intro-en">🧪 Setting up a secure malware analysis lab with REMnux + FLARE-VM</h2>
+<div class="note"><br>Estimated reading time: 6–8 min</div>
+<p>Before executing a malware sample, the first priority is not the tools, the debuggers, or the scripts.</p>
+<p>The first priority is <strong>isolation</strong>.</p>
+<p>A malware analysis lab must be designed to observe the behavior of a sample without allowing it to affect the physical host, contact real infrastructure, or reach the local network.</p>
+<p>In this post I document a basic setup for malware analysis using <strong>REMnux</strong>, <strong>Windows Enterprise LTSC</strong>, <strong>FLARE-VM</strong>, <strong>VMware / VirtualBox</strong>, <strong>Internal Network</strong> and <strong>INetSim</strong>.</p>
+<div style="background:rgba(255,0,170,.05);border:1px solid rgba(255,0,170,.2);border-left:3px solid var(--magenta);padding:14px 20px;margin:24px 0 40px;font-family:var(--font-mono);font-size:.9rem;letter-spacing:.06em;color:var(--magenta);">
+  ⚠  // This content is for educational purposes only and must be used exclusively in personal labs, controlled environments, or systems where explicit authorization exists. Do not execute malware samples outside an isolated environment.
+</div>
+
+<h2 id="lab-objective-en">Lab objective</h2>
+<p>The idea is to have two virtual machines communicating within an isolated network:</p>
+<pre><code>[ Windows Enterprise LTSC + FLARE-VM ]  &lt;----&gt;  [ REMnux ]</code></pre>
+<p>The Windows VM will be the main environment where we analyze sample behavior, run reversing tooling, debugging and monitoring.</p>
+<p>The REMnux VM will act as a support system for network analysis, service simulation, controlled DNS resolution and traffic capture.</p>
+
+<h2 id="components-en">Lab components</h2>
+<h3>REMnux</h3>
+<p><strong>REMnux</strong> is a Linux distribution oriented toward malware analysis and threat research.</p>
+<p>In this lab we will use it to:</p>
+<ul>
+<li>Simulate network services.</li>
+<li>Act as controlled DNS.</li>
+<li>Support traffic analysis.</li>
+<li>Run tools like <strong>INetSim</strong>.</li>
+<li>Centralize part of the network behavior observation.</li>
+</ul>
+<div class="tip"><strong>REMnux download link</strong><br><a href="https://docs.remnux.org/install-distro/get-virtual-appliance">Download REMnux</a></div>
+
+<h3>Windows Enterprise LTSC + FLARE-VM</h3>
+<p>The second machine will be a Windows VM, preferably <strong>Windows Enterprise LTSC</strong>, on which we will install <strong>FLARE-VM</strong>.</p>
+<p>FLARE-VM sets up a Windows environment with useful tools for:</p>
+<ul>
+<li>Reversing.</li><li>Debugging.</li><li>Static analysis.</li><li>Dynamic analysis.</li>
+<li>Process inspection.</li><li>System monitoring.</li><li>PE binary analysis.</li><li>Forensic utilities.</li>
+</ul>
+<div class="tip"><strong>Windows Enterprise Evaluation download</strong> (Windows 10 or 11, your choice — 90 day trial... but bless those snapshots! cof, cof)<br><a href="https://www.microsoft.com/en-us/evalcenter/evaluate-windows-11-enterprise">Download Windows 11 Enterprise Evaluation</a></div>
+<div class="warn"><br>This will be the machine where potentially malicious samples are analyzed. It must not contain personal credentials, real accounts or unnecessary integrations with the host.</div>
+
+<h2 id="windows-prep-en">Preparing Windows before installing FLARE-VM</h2>
+<p>Before installing <strong>FLARE-VM</strong>, it is worth preparing the Windows VM with some basic adjustments.<br>These steps are intended for a lab virtual machine, not a primary system.</p>
+<div class="warn"><br>These changes reduce the protection of the Windows system. Apply them only inside an isolated VM, without personal credentials, dedicated to malware analysis.</div>
+
+<h3>Install browser and terminal</h3>
+<p>Optionally, we can install Chrome and Windows Terminal to work more comfortably inside the VM.</p>
+<ul><li><a href="https://www.google.com/chrome/">Download Google Chrome</a></li></ul>
+<p>For Windows Terminal, from PowerShell we can download the necessary packages:</p>
+<pre><code>wget https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx -UseBasicParsing -o VCLibs.appx
+wget https://github.com/microsoft/terminal/releases/download/v1.15.3465.0/Microsoft.WindowsTerminal_Win10_1.15.3465.0_8wekyb3d8bbwe.msixbundle -UseBasicParsing -o winterminal.msixbundle</code></pre>
+<p>Then, in a PowerShell console as administrator:</p>
+<pre><code>Add-AppxPackage C:\path\to\downloaded\VCLibs.appx
+Add-AppxPackage C:\path\to\downloaded\winterminal.msixbundle</code></pre>
+<div class="note"><br>Windows Terminal installation is optional, but makes it easier to work with PowerShell during environment preparation.</div>
+
+<h3>Disable proxy auto-detect</h3>
+<p>In Windows, go to:</p>
+<pre><code>Settings → Network &amp; Internet → Proxy</code></pre>
+<p>Disable:</p><pre><code>Automatically detect settings: Off</code></pre>
+
+<h3>Disable Windows Defender protections</h3>
+<p>In Windows:</p>
+<pre><code>Windows Security → Virus &amp; threat protection</code></pre>
+<p>Disable protections for the lab environment, including <strong>Tamper Protection</strong> if enabled.</p>
+<div class="warn"><br>This should only be done in an isolated VM. Do not disable Defender or system protections on your main host.</div>
+
+<h3>Disable Microsoft Defender via GPO</h3>
+<p>Open the Group Policy editor:</p>
+<pre><code>gpedit.msc</code></pre>
+<p>Navigate to:</p>
+<pre><code>Administrative Templates → Windows Components → Microsoft Defender Antivirus</code></pre>
+<p>Enable the policy:</p><pre><code>Turn off Microsoft Defender Antivirus</code></pre>
+
+<h3>Disable Windows Firewall via GPO</h3>
+<p>In <code>gpedit.msc</code>, go to:</p>
+<pre><code>Administrative Templates → Network → Network Connections → Windows Defender Firewall</code></pre>
+<p>Disable protection in:</p><pre><code>Domain Profile&#10;Standard Profile</code></pre>
+<div class="note"><br>In this lab, security should not rely on the Windows firewall, but on the network isolation we will configure via an isolated VMnet in VMware (also applicable in VirtualBox).</div>
+
+<h3>Take a snapshot before installing FLARE-VM</h3>
+<p>Before installing FLARE-VM, take a clean snapshot of the Windows VM:</p>
+<pre><code>Snapshot: Windows Enterprise - Pre FLARE-VM Install</code></pre>
+
+<h3>Download the FLARE-VM installer</h3>
+<p>In PowerShell as administrator:</p>
+<pre><code>(New-Object net.webclient).DownloadFile('https://raw.githubusercontent.com/mandiant/flare-vm/main/install.ps1',"$([Environment]::GetFolderPath('Desktop'))\install.ps1")</code></pre>
+<p><a href="https://github.com/mandiant/flare-vm#flare-vm-installation">Official FLARE-VM documentation</a></p>
+<div class="tip"><br>After installing FLARE-VM and validating everything works, create another clean snapshot:
+<pre><code>Snapshot: FlareVM</code></pre></div>
+
+<h3>Phase summary</h3>
+<ul>
+<li>Windows Enterprise installed.</li><li>Optional browser and terminal installed.</li>
+<li>Proxy auto-detect disabled.</li><li>Defender prepared for lab environment.</li>
+<li>Firewall disabled inside the VM.</li><li>Pre-FLARE-VM snapshot created.</li>
+<li>FLARE-VM installer downloaded and executed.</li><li>Post FLARE-VM snapshot.</li>
+</ul>
+
+<h2 id="network-design-en">Network design</h2>
+<p>For this lab we can use two approaches:</p>
+<pre><code>1. Host-Only Network&#10;2. Internal Network</code></pre>
+<p>A <strong>Host-Only</strong> network allows communication between VMs and the physical host in certain scenarios. An <strong>Internal Network</strong> creates an isolated network where VMs can communicate with each other but not with the physical host or the LAN.</p>
+<p>For this lab I will use:</p>
+<pre><code>Network type: Internal Network&#10;Name: mw-l4b</code></pre>
+<div class="tip"><br>For a malware lab, an Internal Network is generally a more conservative option as it reduces exposure of the physical host.</div>
+
+<h2 id="final-topology-en">Final topology</h2>
+<pre><code>Internal Network: mw-l4b
+
+REMnux          IP: 10.0.0.3/24  → INetSim server
+Windows FLARE   IP: 10.0.0.X/24
+                Gateway: 10.0.0.3
+                DNS: 10.0.0.3</code></pre>
+
+<h2 id="vmware-network-en">VMware network configuration</h2>
+<p>In VMware, open each VM settings:</p>
+<pre><code>VM → Settings → Network Adapter</code></pre>
+<pre><code>Network connection: Custom
+Virtual network: isolated VMnet for the lab
+Connect at power on: Enabled</code></pre>
+<div class="note"><br>In VMware you can create a custom virtual network from <strong>Virtual Network Editor</strong>. The VMnet must be isolated, without <strong>Bridged</strong> or <strong>NAT</strong> connection to the Internet.</div>
+
+<h2 id="remnux-static-ip-en">Static IP on REMnux</h2>
+<pre><code>sudo nano /etc/netplan/01-netcfg.yaml</code></pre>
+<pre><code>network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0s3:
+      dhcp4: no
+      addresses: [10.0.0.3/24]
+      gateway4: 10.0.0.1</code></pre>
+<pre><code>sudo netplan apply</code></pre>
+<pre><code>ip -br -c a  →  enp0s3 UP 10.0.0.3/24</code></pre>
+<div class="warn"><br>If <code>netplan apply</code> returns YAML errors, check the indentation. YAML is whitespace-sensitive.</div>
+
+<h2 id="windows-static-ip-en">Static IP on Windows + FLARE-VM</h2>
+<pre><code>View Network Connections → Ethernet → Properties → IPv4 → Properties</code></pre>
+<pre><code>IP address:      10.0.0.X
+Subnet mask:     255.255.255.0
+Default gateway: 10.0.0.3
+Preferred DNS:   10.0.0.3</code></pre>
+<pre><code>ipconfig /all</code></pre>
+
+<h2 id="connectivity-en">Connectivity tests between VMs</h2>
+<p>From Windows to REMnux:</p><pre><code>ping -n 2 10.0.0.3</code></pre>
+<p>From REMnux to Windows:</p><pre><code>ping -c 2 10.0.0.X</code></pre>
+
+<h2 id="isolation-en">Isolation tests</h2>
+<p>From REMnux:</p><pre><code>ping -c 2 8.8.8.8  →  100% packet loss</code></pre>
+<p>From Windows:</p><pre><code>ping -n 2 8.8.8.8  →  Request timed out.</code></pre>
+<p>Verify physical host is also unreachable:</p><pre><code>ping -n 2 &lt;PHYSICAL_HOST_IP&gt;  →  Request timed out.</code></pre>
+<div class="note"><br>These tests confirm the internal network is not routing traffic outside the lab.</div>
+
+<h2 id="inetsim-en">Service simulation with INetSim</h2>
+<p>Once isolation is validated, start <strong>INetSim</strong> on REMnux:</p>
+<pre><code>inetsim</code></pre>
+<pre><code>Listening on: 10.0.0.3
+dns_53_tcp_udp - started
+http_80_tcp - started
+https_443_tcp - started</code></pre>
+<p>Test from Windows:</p><pre><code>nslookup example-malware.com  →  Address: 10.0.0.3</code></pre>
+<div class="tip"><br>This allows observing malware network behavior without allowing contact with real infrastructure.</div>
+
+<h2 id="snapshots-en">Snapshots</h2>
+<pre><code>REMnux   → Snapshot: Clean REMnux - Internal Network + INetSim configured
+Windows  → Snapshot: Predetonation - Clean FLARE-VM ready for sample detonation</code></pre>
+<div class="warn"><br>Never assume a VM is still clean after executing a sample.</div>
+
+<h2 id="checklist-en">Basic lab checklist</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Both VMs on the same Internal Network.</li>
+<li><input disabled="" type="checkbox"> REMnux has static IP <code>10.0.0.3/24</code>.</li>
+<li><input disabled="" type="checkbox"> Windows has static IP <code>10.0.0.X/24</code>.</li>
+<li><input disabled="" type="checkbox"> Windows uses <code>10.0.0.3</code> as gateway.</li>
+<li><input disabled="" type="checkbox"> Windows uses <code>10.0.0.3</code> as DNS.</li>
+<li><input disabled="" type="checkbox"> Windows can ping REMnux.</li>
+<li><input disabled="" type="checkbox"> REMnux can ping Windows.</li>
+<li><input disabled="" type="checkbox"> Neither VM can reach <code>8.8.8.8</code>.</li>
+<li><input disabled="" type="checkbox"> Neither VM can reach the physical host.</li>
+<li><input disabled="" type="checkbox"> No real Internet access.</li>
+<li><input disabled="" type="checkbox"> INetSim responds correctly from REMnux.</li>
+<li><input disabled="" type="checkbox"> Clean snapshots created.</li>
+<li><input disabled="" type="checkbox"> Shared folders disabled.</li>
+<li><input disabled="" type="checkbox"> Bidirectional clipboard disabled.</li>
+<li><input disabled="" type="checkbox"> Drag &amp; drop disabled.</li>
+<li><input disabled="" type="checkbox"> No personal credentials inside VMs.</li>
+<li><input disabled="" type="checkbox"> No personal accounts open in browser.</li>
+<li><input disabled="" type="checkbox"> Samples are isolated and documented.</li>
+</ul>
+
+<h2 id="security-en">Security recommendations</h2>
+<h3>Disable shared folders</h3>
+<pre><code>VMware → VM Settings → Options → Shared Folders → Disabled
+VirtualBox → Settings → Shared Folders → Remove</code></pre>
+<h3>Disable shared clipboard</h3>
+<pre><code>VMware → VM Settings → Options → Guest Isolation
+Enable drag and drop: Disabled / Enable copy and paste: Disabled</code></pre>
+<h3>Use snapshots per phase</h3>
+<pre><code>Snapshot 1: Clean system
+Snapshot 2: Tools installed
+Snapshot 3: Network configured
+Snapshot 4: Before sample analysis (Predetonation)</code></pre>
+
+<h2 id="tools-windows-en">Useful tools on Windows + FLARE-VM</h2>
+<table><thead><tr><th>Tool</th><th>Main use</th></tr></thead><tbody>
+<tr><td>Process Monitor</td><td>Process, file, registry and system event monitoring</td></tr>
+<tr><td>Process Explorer</td><td>Advanced process inspection</td></tr>
+<tr><td>Autoruns</td><td>Persistence and auto-start review</td></tr>
+<tr><td>TCPView</td><td>Active TCP/UDP connections on Windows</td></tr>
+<tr><td>Wireshark</td><td>Network capture and analysis</td></tr>
+<tr><td>x64dbg</td><td>Windows binary debugging</td></tr>
+<tr><td>PEStudio</td><td>Static analysis of PE executables</td></tr>
+<tr><td>Detect It Easy</td><td>Packer, compiler and format identification</td></tr>
+<tr><td>Ghidra/IDA</td><td>Disassembly and decompilation</td></tr>
+<tr><td>FLOSS</td><td>Obfuscated string extraction</td></tr>
+<tr><td>capa</td><td>Binary capability identification</td></tr>
+<tr><td>RegShot</td><td>Registry change comparison</td></tr>
+<tr><td>FakeNet-NG</td><td>Network simulation on Windows</td></tr>
+<tr><td>CyberChef</td><td>Data transformation and decoding</td></tr>
+<tr><td>Sysinternals Suite</td><td>Advanced Windows diagnostic utilities</td></tr>
+</tbody></table>
+
+<h2 id="tools-remnux-en">Useful tools on REMnux</h2>
+<table><thead><tr><th>Tool</th><th>Main use</th></tr></thead><tbody>
+<tr><td>INetSim</td><td>Network service simulation</td></tr>
+<tr><td>Wireshark</td><td>Traffic capture and analysis</td></tr>
+<tr><td>tcpdump</td><td>Terminal traffic capture</td></tr>
+<tr><td>radare2</td><td>Reversing and binary analysis</td></tr>
+<tr><td>yara</td><td>Rule-based detection</td></tr>
+<tr><td>capa</td><td>Binary capability identification</td></tr>
+<tr><td>floss</td><td>Obfuscated string extraction</td></tr>
+<tr><td>oledump</td><td>OLE document analysis</td></tr>
+<tr><td>pdf-parser</td><td>Suspicious PDF analysis</td></tr>
+<tr><td>exiftool</td><td>Metadata extraction</td></tr>
+<tr><td>ssdeep</td><td>Fuzzy hashing and sample comparison</td></tr>
+</tbody></table>
+
+<h2 id="workflow-en">Basic analysis workflow</h2>
+<pre><code>1.  Restore clean snapshot
+2.  Verify internal network
+3.  Confirm no Internet access
+4.  Start traffic capture
+5.  Start INetSim on REMnux
+6.  Start monitoring tools on Windows
+7.  Copy sample to environment
+8.  Calculate hashes
+9.  Perform initial static analysis
+10. Execute sample if appropriate
+11. Observe processes, files, registry and traffic
+12. Document IoCs and behavior
+13. Shut down VM
+14. Revert snapshot</code></pre>
+
+<h2 id="quick-commands-en">Quick validation commands</h2>
+<h3>REMnux</h3>
+<pre><code>ip -br -c a
+ping -c 2 10.0.0.4
+ping -c 2 8.8.8.8
+nslookup google.com
+inetsim</code></pre>
+<h3>Windows</h3>
+<pre><code>ipconfig /all
+ping -n 2 10.0.0.3
+ping -n 2 8.8.8.8
+ping -n 2 google.com
+ipconfig /flushdns
+nslookup test.local</code></pre>
+
+<h2 id="summary-en">Summary</h2>
+<p>Building a lab with <strong>REMnux + Windows Enterprise LTSC with FLARE-VM</strong> is a practical way to get started in malware analysis in a controlled manner.</p>
+<p>The key is not just installing tools, but building an environment that is reproducible, isolated and easy to restore.</p>
+<p>A good lab should allow us to:</p>
+<ul>
+<li>Execute samples in a controlled way.</li>
+<li>Observe network behavior.</li>
+<li>Simulate external services (INetSim).</li>
+<li>Avoid real Internet connections.</li>
+<li>Protect the physical host.</li>
+<li>Restore the environment quickly if things go wrong.</li>
+<li>Document all results consistently.</li>
+</ul>
+<div class="warn"><br>Above all: do not execute malware in an environment you are not willing to lose.</div>
+<div class="tip"><br>The snapshot is your restore point and your greatest ally.<br>Isolation will be your first line of defense.</div>
+
+<h2 id="tags-en">Tags</h2>
+<p><code>#MalwareAnalysis</code> <code>#ReverseEngineering</code> <code>#REMnux</code> <code>#FLAREVM</code> <code>#CyberSecurity</code> <code>#BlueTeam</code> <code>#ThreatResearch</code> <code>#DFIR</code> <code>#VirtualBox</code> <code>#INetSim</code> <code>#MalwareLab</code></p>
+</div><!-- end lang-en -->
 
       <hr class="divider">
       <div style="margin-top:32px;">
         <a href="../../blog.html" style="background:var(--dark2);border:1px solid var(--border);padding:16px 22px;text-decoration:none;color:var(--text);font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;transition:border-color .2s,background .2s;display:inline-block;" onmouseover="this.style.borderColor='rgba(0,255,245,.25)';this.style.background='var(--dark3)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--dark2)'">← BACK TO BLOG</a>
       </div>
-    </article>
-    
+    </article>    
     <aside class="toc">
       <h4>// INDEX</h4>
       <ul>
