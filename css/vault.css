@@ -433,5 +433,83 @@ footer {
     overflow-x: auto;
     white-space: nowrap;
   }
+/* ═══════════════════════════
+   POST LAYOUT — RESPONSIVE
+   Aplica a todos los posts automáticamente
+═══════════════════════════ */
+ 
+/* Pre/code — scroll horizontal en lugar de desbordar */
+.post-article pre {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  word-wrap: normal;
 }
+.post-article pre code {
+  white-space: pre;
+  word-break: normal;
+  display: block;
+}
+ 
+/* Imágenes responsivas */
+.post-article img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+ 
+/* Pantallas grandes >= 1440px: centrar y limitar ancho */
+@media(min-width:1440px) {
+  .wrapper { max-width:1240px; }
+}
+ 
+/* Tablet y móvil <= 900px */
+@media(max-width:900px) {
+  /* El grid pasa a una sola columna — el TOC sube arriba del artículo */
+  .post-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .toc {
+    position: static !important;
+    margin-bottom: 28px;
+    order: -1; /* TOC arriba del artículo */
+  }
+  .post-article {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+  /* Padding lateral más estrecho en móvil */
+  .wrapper {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  /* Títulos del artículo adaptativos */
+  .post-article h1 {
+    font-size: clamp(1.4rem, 5vw, 2rem) !important;
+  }
+  .post-article h2 {
+    font-size: clamp(1.05rem, 4vw, 1.3rem) !important;
+  }
+}
+ 
+/* Nota TFG — estilo reutilizable para cualquier post */
+.tfg-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(0,255,245,.04);
+  border: 1px solid rgba(0,255,245,.18);
+  border-left: 3px solid var(--cyan);
+  padding: 16px 20px;
+  margin: 40px 0;
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  letter-spacing: .06em;
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+.tfg-note a { color: var(--cyan); text-decoration: none; }
+.tfg-note a:hover { text-shadow: var(--glow-c); }
+.tfg-note .tfg-icon { font-size: 1.1rem; margin-top: 2px; flex-shrink: 0; }
+ 
 
