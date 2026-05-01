@@ -493,7 +493,7 @@ footer {
 }
  
 /* Nota TFG — estilo reutilizable para cualquier post */
-.tfg-note {
+/*.tfg-note {
   display: flex;
   align-items: flex-start;
   gap: 14px;
@@ -510,6 +510,51 @@ footer {
 }
 .tfg-note a { color: var(--cyan); text-decoration: none; }
 .tfg-note a:hover { text-shadow: var(--glow-c); }
-.tfg-note .tfg-icon { font-size: 1.1rem; margin-top: 2px; flex-shrink: 0; }
+.tfg-note .tfg-icon { font-size: 1.1rem; margin-top: 2px; flex-shrink: 0; }*/
+/* Nota TFG */
+.tfg-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(0,255,245,.06);
+  border: 1px solid rgba(0,255,245,.32);
+  border-left: 4px solid var(--cyan);
+  box-shadow: 0 0 22px rgba(0,255,245,.08);
+  padding: 16px 20px;
+  margin: 40px 0;
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  letter-spacing: .06em;
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+
+.tfg-note strong {
+  color: var(--cyan);
+  text-shadow: var(--glow-c);
+}
+
+.tfg-note a {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+.tfg-note a:hover {
+  text-shadow: var(--glow-c);
+}
+
+.tfg-note .tfg-icon {
+  font-size: 1.1rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.tfg-note p {
+  margin: 0 0 8px;
+}
+
+.tfg-note p:last-child {
+  margin-bottom: 0;
+}
  
 
