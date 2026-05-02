@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' cdnjs.cloudflare.com unpkg.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SOC casero modular con Wazuh + Snort + Bot de Telegram // The Vault</title>
+<link rel="stylesheet" href="../../css/vault.css">
+<style>
+  .post-layout{display:grid;grid-template-columns:1fr 260px;gap:48px;align-items:start;}
+  .toc{position:sticky;top:80px;background:var(--dark2);border:1px solid var(--border);padding:22px;}
+  .toc h4{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.22em;color:var(--cyan);text-shadow:var(--glow-c);margin-bottom:16px;text-transform:uppercase;}
+  .toc ul{list-style:none;}
+  .toc li{border-bottom:1px solid var(--border);}
+  .toc a{display:block;padding:9px 0;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);text-decoration:none;letter-spacing:.08em;transition:color .2s,padding-left .2s;}
+  .toc a:hover{color:var(--cyan);padding-left:6px;}
+  .toc .toc-sub a{padding-left:14px;font-size:.65rem;}
+  @media(max-width:900px){.post-layout{grid-template-columns:1fr!important;}.toc{position:static!important;margin-bottom:28px;}.post-article{min-width:0;overflow-x:hidden;}.wrapper{padding-left:16px!important;padding-right:16px!important;}}
+  @media(min-width:1440px){.wrapper{max-width:1240px;}}
+  #progress{position:fixed;top:56px;left:0;height:2px;background:var(--cyan);box-shadow:var(--glow-c);z-index:999;transition:width .1s;width:0;}
+  /* Diagrama SVG arquitectura */
+  .arch-diagram{width:100%;max-width:720px;margin:28px auto;display:block;}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<canvas id="particles"></canvas>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../../index.html" class="nav-logo">THE<em>//</em>VAULT</a>
+    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="../../index.html"><span class="status-dot"></span>HOME</a></li>
+      <li class="bt"><a href="../../blue-team.html">BLUE TEAM</a></li>
+      <li class="rt"><a href="../../red-team.html">RED TEAM</a></li>
+      <li class="rc"><a href="../../recursos.html">RESOURCES</a></li>
+      <li><a href="../../blog.html">BLOG</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrap">
+<div class="wrapper" style="padding-top:48px;padding-bottom:60px;">
+
+  <div style="font-family:var(--font-mono);font-size:.65rem;letter-spacing:.12em;color:var(--text-dim);margin-bottom:32px;">
+    <a href="../../index.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">HOME</a>
+    <span style="margin:0 10px;color:var(--magenta)"> // </span>
+    <a href="../../blog.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">BLOG</a>
+    <span style="margin:0 10px;color:var(--magenta)"> // </span>
+    <span style="color:var(--cyan)">SOC CASERO: WAZUH + SNORT + TELEGRAM</span>
+  </div>
+
+  <div style="margin-bottom:40px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+      <span class="badge c">BLUE TEAM</span>
+      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;">2026-05-01</span>
+      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);">// 8 min read</span>
+    </div>
+    <h1 style="font-family:var(--font-hd);font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:12px;">SOC casero modular con Wazuh + Snort + Bot de Telegram</h1>
+    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;">Implementación técnica de un SOC casero usando Wazuh, Snort y un bot de Telegram para monitorización, detección y envío de alertas de seguridad en tiempo real.</p>
+  </div>
+
+  <div class="tfg-note">
+    <div class="tfg-icon">🎓</div>
+    <div>
+      <div lang-es>
+        Este post forma parte de mi <strong>Trabajo de Final de Grado</strong> —
+        <em>Implementación práctica de un sistema de monitorización, respuesta y notificación en un entorno asequible</em> (UOC, 2025).<br>
+        Puedes consultar el documento completo en el repositorio de la UOC:
+        <a href="https://openaccess.uoc.edu/items/1784c999-8bc7-4393-b672-0a70987b468e" target="_blank" rel="noopener">openaccess.uoc.edu →</a>
+      </div>
+      <div lang-en>
+        This post is part of my <strong>Bachelor's Final Project</strong> —
+        <em>Practical implementation of a monitoring, response and notification system in an affordable environment</em> (UOC, 2025).<br>
+        You can read the full document at the UOC open access repository:
+        <a href="https://openaccess.uoc.edu/items/1784c999-8bc7-4393-b672-0a70987b468e" target="_blank" rel="noopener">openaccess.uoc.edu →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="post-layout">
+    <article class="post-article" id="post-content">
+
+<!-- ═══════════════════ ESPAÑOL ═══════════════════ -->
+<div lang-es>
+
+<h2 id="intro-es">Introducción</h2>
+<p>Este post documenta la implementación técnica de un sistema de monitorización, detección y notificación de alertas de seguridad usando herramientas open source accesibles. El stack completo está basado en <strong>Wazuh 4.9.2</strong>, <strong>Snort 2.9.x</strong> en Windows y un <strong>bot de Telegram</strong> para enviar notificaciones del nivel de criticidad que configures en tiempo real.</p>
+
+<p>La arquitectura resultante es la siguiente:</p>
+
+<!-- DIAGRAMA SVG -->
+<svg class="arch-diagram" viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow-es" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#ff00aa"/>
+    </marker>
+    <filter id="glow-c-es">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Box 1: Windows -->
+  <rect x="10" y="30" width="155" height="100" rx="4" fill="rgba(0,20,30,0.8)" stroke="#00fff5" stroke-width="1"/>
+  <text x="87" y="58" font-family="monospace" font-size="11" fill="#00fff5" text-anchor="middle" filter="url(#glow-c-es)">WINDOWS</text>
+  <text x="87" y="76" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">+ Agente Wazuh</text>
+  <text x="87" y="92" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">+ Snort</text>
+  <text x="87" y="118" font-family="monospace" font-size="9" fill="#ff00aa" text-anchor="middle">Endpoint monitorizado</text>
+  <!-- Arrow 1 -->
+  <line x1="167" y1="80" x2="213" y2="80" stroke="#ff00aa" stroke-width="1.5" marker-end="url(#arrow-es)"/>
+  <text x="190" y="72" font-family="monospace" font-size="8" fill="#ff00aa" text-anchor="middle">logs</text>
+  <!-- Box 2: Wazuh Server -->
+  <rect x="215" y="30" width="155" height="100" rx="4" fill="rgba(0,20,30,0.8)" stroke="#00fff5" stroke-width="1"/>
+  <text x="292" y="58" font-family="monospace" font-size="11" fill="#00fff5" text-anchor="middle" filter="url(#glow-c-es)">WAZUH SERVER</text>
+  <text x="292" y="76" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">OVA / VirtualBox</text>
+  <text x="292" y="92" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">Filebeat + Manager</text>
+  <text x="292" y="118" font-family="monospace" font-size="9" fill="#ff00aa" text-anchor="middle">Correlación y reglas</text>
+  <!-- Arrow 2 -->
+  <line x1="372" y1="80" x2="418" y2="80" stroke="#ff00aa" stroke-width="1.5" marker-end="url(#arrow-es)"/>
+  <text x="395" y="72" font-family="monospace" font-size="8" fill="#ff00aa" text-anchor="middle">alertas</text>
+  <!-- Box 3: Bot Telegram -->
+  <rect x="420" y="30" width="135" height="100" rx="4" fill="rgba(0,20,30,0.8)" stroke="#00fff5" stroke-width="1"/>
+  <text x="487" y="58" font-family="monospace" font-size="11" fill="#00fff5" text-anchor="middle" filter="url(#glow-c-es)">BOT</text>
+  <text x="487" y="74" font-family="monospace" font-size="11" fill="#00fff5" text-anchor="middle" filter="url(#glow-c-es)">TELEGRAM</text>
+  <text x="487" y="95" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">custom-telegram.py</text>
+  <text x="487" y="118" font-family="monospace" font-size="9" fill="#ff00aa" text-anchor="middle">API Telegram</text>
+  <!-- Arrow 3 -->
+  <line x1="557" y1="80" x2="600" y2="80" stroke="#ff00aa" stroke-width="1.5" marker-end="url(#arrow-es)"/>
+  <!-- Box 4: Notificación -->
+  <rect x="602" y="30" width="110" height="100" rx="4" fill="rgba(0,20,30,0.8)" stroke="#39ff14" stroke-width="1"/>
+  <text x="657" y="58" font-family="monospace" font-size="9" fill="#39ff14" text-anchor="middle">📱 ALERTA</text>
+  <text x="657" y="76" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">Notificación</text>
+  <text x="657" y="92" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">en tiempo real</text>
+  <text x="657" y="118" font-family="monospace" font-size="9" fill="#39ff14" text-anchor="middle">nivel &gt;= 3</text>
+</svg>
+
+<blockquote>⚠️ Este contenido es de carácter educativo. Todo fue implementado en un entorno controlado y virtualizado.</blockquote>
+<hr>
+
+<h2 id="wazuh-es">1. Wazuh — Instalación y configuración base</h2>
+<h3 id="wazuh-vm-es">1.1 Despliegue de la VM</h3>
+<p>Wazuh ofrece una máquina virtual preconfigurada en formato <code>.ova</code> que incluye:</p>
+<ul>
+<li>Wazuh Manager</li><li>Wazuh Dashboard</li><li>Wazuh Indexer</li>
+<li>Filebeat-OSS</li><li>Amazon Linux</li>
+</ul>
+<p>Descarga desde la <a href="https://documentation.wazuh.com/current/deployment-options/virtual-machine/virtual-machine.html">documentación oficial de Wazuh</a>.<br>Importa el <code>.ova</code> en VirtualBox desde <strong>Archivo → Importar servicio virtualizado</strong>.</p>
+<p><strong>Requisitos mínimos recomendados:</strong></p>
+<table><thead><tr><th>Recurso</th><th>Mínimo</th></tr></thead><tbody>
+<tr><td>CPU</td><td>2 núcleos</td></tr>
+<tr><td>RAM</td><td>2-4 GB</td></tr>
+<tr><td>Almacenamiento</td><td>20 GB</td></tr>
+<tr><td>Red</td><td>NAT / Adaptador puente</td></tr>
+</tbody></table>
+
+<h3 id="wazuh-dash-es">1.2 Acceso al Dashboard</h3>
+<p>Una vez arrancada la VM, obtén su IP:</p>
+<pre><code>ip a</code></pre>
+<p>Accede desde el navegador del host: <code>https://192.168.1.X</code><br>
+Credenciales por defecto: <code>admin / admin</code>. Cámbialas desde el Dashboard → icono de usuario → Reset password.</p>
+
+<h3 id="wazuh-agent-es">1.3 Instalación del agente en Windows</h3>
+<p>Desde la terminal del servidor Wazuh como root:</p>
+<pre><code>/var/ossec/bin/manage_agents</code></pre>
+<p>Selecciona <strong>A</strong> para añadir agente, introduce nombre e IP del cliente Windows. Extrae la clave de autenticación con opción <strong>E</strong>.</p>
+<p>En el cliente Windows instala el agente desde la <a href="https://documentation.wazuh.com/current/installation-guide/wazuh-agent/index.html">guía oficial</a>, introduce la IP del servidor y la clave.<br>
+Verifica en: <strong>Dashboard → Server management → Endpoints Summary</strong></p>
+<hr>
+
+<h2 id="snort-es">2. Snort — Instalación y configuración en Windows</h2>
+<h3 id="snort-install-es">2.1 Instalación</h3>
+<p>Descarga Snort desde <a href="https://www.snort.org/downloads">snort.org/downloads</a>. Sigue el asistente con valores por defecto. Durante la instalación se pedirá instalar <strong>Npcap</strong> para captura de paquetes — descárgalo desde <a href="https://npcap.com/#download">npcap.com</a>.</p>
+
+<h3 id="snort-rules-es">2.2 Reglas preconfiguradas para Windows</h3>
+<p>Para evitar adaptar manualmente rutas y variables, usa las reglas preconfiguradas del repositorio del TFG:</p>
+<p>👉 <a href="https://github.com/Jmullorru/Snort-Rules-Config_Windows">github.com/Jmullorru/Snort-Rules-Config_Windows</a></p>
+<p>Descarga el ZIP y extrae en <code>c:\Snort</code> confirmando el reemplazo de archivos. Estructura resultante:</p>
+<pre><code>c:\Snort\
+├── bin\      ├── etc\      ├── rules\
+├── preproc_rules\          └── so_rules\</code></pre>
+
+<h3 id="snort-net-es">2.3 Personalización de variables de red</h3>
+<p>Edita <code>c:\snort\etc\snort.conf</code> y ajusta <code>HOME_NET</code>:</p>
+<pre><code># Obtén tu IP
+ipconfig</code></pre>
+<pre><code># Setup the network addresses you are protecting
+ipvar HOME_NET 192.168.1.X</code></pre>
+
+<h3 id="snort-val-es">2.4 Validación de la configuración</h3>
+<p>Abre CMD como administrador:</p>
+<pre><code>cd \snort\bin
+snort -W                                    # listar interfaces
+snort -c c:\snort\etc\snort.conf -T -i #   # # = número de interfaz</code></pre>
+<p>Resultado esperado: <code>Snort successfully validated the configuration!</code></p>
+<hr>
+
+<h2 id="integracion-es">3. Integración Snort → Wazuh</h2>
+<h3 id="shared-es">3.1 Carpeta compartida en VirtualBox</h3>
+<p>Con la VM de Wazuh apagada ve a <strong>Configuración → Carpetas compartidas</strong>:</p>
+<ul>
+<li><strong>Ruta:</strong> <code>c:\snort\log</code></li>
+<li><strong>Nombre:</strong> <code>log</code></li>
+<li><strong>Automontar:</strong> ✅ &nbsp; <strong>Hacer permanente:</strong> ✅</li>
+</ul>
+<p>Al arrancar, la carpeta estará disponible en <code>/media/sf_log</code>.</p>
+
+<h3 id="filebeat-es">3.2 Configuración de Filebeat</h3>
+<pre><code>vim /etc/filebeat/filebeat.yml</code></pre>
+<p>Añade justo después de <code>filebeat.modules</code>:</p>
+<pre><code>filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /media/sf_log/alert.ids
+    fields:
+      log_type: snort
+    fields_under_root: true</code></pre>
+<pre><code>filebeat test config    # → Config OK
+filebeat test output    # → Conexión OK con Elasticsearch
+filebeat -e -d "input"  # → Verificar monitorización en tiempo real</code></pre>
+
+<h3 id="logtest-es">3.3 Validación con wazuh-logtest</h3>
+<pre><code>/var/ossec/bin/wazuh-logtest</code></pre>
+<p>Inserta un log de ejemplo:</p>
+<pre><code>12/21-23:12:18.777511 [**] [1:1000002:1] Alerta Critica - Intento de acceso SSH
+detectado [**] [Priority: 1] {TCP} 192.168.1.XX:63855 -> 192.168.1.XX:22</code></pre>
+<p>Wazuh lo procesará en 3 fases: <strong>Pre-decoding</strong> → <strong>Decoding</strong> (IPs, protocolo, fuente: snort) → <strong>Filtering</strong> (asigna regla y nivel de alerta).</p>
+
+<h3 id="rules-es">3.4 Reglas y decoders personalizados</h3>
+<p><strong>Decoder</strong> (<code>/var/ossec/etc/decoders/local_decoder.xml</code>):</p>
+<pre><code>&lt;decoder name="snort"&gt;
+  &lt;type&gt;ids&lt;/type&gt;
+  &lt;prematch&gt;[**] [\d+:\d+:\d+] &lt;/prematch&gt;
+&lt;/decoder&gt;
+
+&lt;decoder name="snort_ssh"&gt;
+  &lt;parent&gt;snort&lt;/parent&gt;
+  &lt;type&gt;ids&lt;/type&gt;
+  &lt;prematch&gt;[**] [\d+:\d+:\d+] &lt;/prematch&gt;
+  &lt;order&gt;snortRule, alertType, alertInfo, priority, priorityLvl, protocol, srcIP, dstIP, port&lt;/order&gt;
+&lt;/decoder&gt;</code></pre>
+
+<p><strong>Reglas</strong> (<code>/var/ossec/etc/rules/local_rules.xml</code>):</p>
+<pre><code>&lt;group name="snort_ssh"&gt;
+  &lt;rule id="100010" level="12"&gt;
+    &lt;decoded_as&gt;snort_ssh&lt;/decoded_as&gt;
+    &lt;description&gt;Snort: Alerta Crítica - Intento de acceso SSH detectado&lt;/description&gt;
+  &lt;/rule&gt;
+&lt;/group&gt;
+
+&lt;group name="snort_portScan"&gt;
+  &lt;rule id="100011" level="12"&gt;
+    &lt;decoded_as&gt;snort_portScan&lt;/decoded_as&gt;
+    &lt;description&gt;Snort: Escaneo de puertos detectado&lt;/description&gt;
+  &lt;/rule&gt;
+&lt;/group&gt;</code></pre>
+
+<h3 id="ossec-es">3.5 Monitorización de rutas en tiempo real</h3>
+<p>En <code>C:\Program Files (x86)\ossec-agent\ossec.conf</code>, después del bloque de 32 bits:</p>
+<pre><code>&lt;directories realtime="yes" report_changes="yes" check_all="yes"&gt;
+  C:\Users\TU_USUARIO\Desktop
+&lt;/directories&gt;</code></pre>
+<blockquote>⚠️ <strong>Nota Wazuh 4.9.2:</strong> Las alertas de Snort se procesan correctamente pero pueden no visualizarse en el Dashboard. Limitación conocida en la comunidad, probablemente ya resuelta en versiones posteriores. Las alertas sí funcionan a nivel de reglas y notificaciones Telegram.</blockquote>
+<hr>
+
+<h2 id="telegram-es">4. Bot de Telegram para alertas en tiempo real</h2>
+<p>Último paso: un bot de Telegram que reciba las alertas de Wazuh y las reenvíe al instante. Configura bien el nivel mínimo de alerta o tu teléfono no parará de sonar 🔔</p>
+
+<h3 id="botfather-es">4.1 Creación del bot con BotFather</h3>
+<ol>
+<li>Abre Telegram → busca <strong>@BotFather</strong> (perfil verificado con ✓)</li>
+<li>Ejecuta <code>/newbot</code></li>
+<li>Asigna nombre y username terminado en <code>_bot</code></li>
+<li>Guarda el <strong>token de API</strong></li>
+<li>Ejecuta <code>/start</code> en el bot creado</li>
+</ol>
+
+<h3 id="grupo-es">4.2 Creación del grupo de notificaciones</h3>
+<p>Crea un grupo en Telegram (ejemplo: <code>MiSOC_WazuhAlerts</code>) y añade el bot como miembro.<br>
+El <strong>Chat ID</strong> lo encuentras en la URL de Telegram Web:</p>
+<pre><code>web.telegram.org/a/#-4793XXXX
+                    ^^^^^^^^^^^ este es el ID (incluye el guión -)</code></pre>
+
+<h3 id="integracion-wazuh-es">4.3 Integración en Wazuh</h3>
+<p>Crea el script wrapper:</p>
+<pre><code>nano /var/ossec/integrations/custom-telegram</code></pre>
+<pre><code>#!/bin/sh
+WPYTHON_BIN="framework/python/bin/python3"
+SCRIPT_PATH_NAME="$0"
+DIR_NAME="$(cd $(dirname ${SCRIPT_PATH_NAME}); pwd -P)"
+SCRIPT_NAME="$(basename ${SCRIPT_PATH_NAME})"
+case ${DIR_NAME} in
+  */active-response/bin | */wodles*)
+    WAZUH_PATH="$(cd ${DIR_NAME}/../..; pwd)"
+    PYTHON_SCRIPT="${DIR_NAME}/${SCRIPT_NAME}.py" ;;
+  */bin)
+    WAZUH_PATH="$(cd ${DIR_NAME}/..; pwd)"
+    PYTHON_SCRIPT="${WAZUH_PATH}/framework/scripts/${SCRIPT_NAME}.py" ;;
+  */integrations)
+    WAZUH_PATH="$(cd ${DIR_NAME}/..; pwd)"
+    PYTHON_SCRIPT="${DIR_NAME}/${SCRIPT_NAME}.py" ;;
+esac
+${WAZUH_PATH}/${WPYTHON_BIN} ${PYTHON_SCRIPT} "$@"</code></pre>
+
+<p>Crea el script Python:</p>
+<pre><code>nano /var/ossec/integrations/custom-telegram.py</code></pre>
+<pre><code>#!/usr/bin/env python
+import sys, json, requests
+
+CHAT_ID="-TU_CHAT_ID"  # sustituir por el ID del grupo
+
+alert_file = open(sys.argv[1])
+hook_url   = sys.argv[3]
+alert_json = json.loads(alert_file.read())
+alert_file.close()
+
+alert_level = alert_json['rule']['level']       if 'level'       in alert_json['rule']  else "N/A"
+description = alert_json['rule']['description'] if 'description' in alert_json['rule']  else "N/A"
+agent       = alert_json['agent']['name']        if 'name'        in alert_json['agent'] else "N/A"
+
+msg_data = {'chat_id': CHAT_ID, 'text': {
+    'description': description,
+    'alert_level': str(alert_level),
+    'agent': agent
+}}
+headers = {'content-type': 'application/json', 'Accept-Charset': 'UTF-8'}
+requests.post(hook_url, headers=headers, data=json.dumps(msg_data))
+sys.exit(0)</code></pre>
+
+<p>Asigna permisos (ajuste necesario en Wazuh 4.9.2):</p>
+<pre><code>chown root:wazuh /var/ossec/integrations/custom-telegram*
+chmod 750 /var/ossec/integrations/custom-telegram*</code></pre>
+
+<h3 id="ossecconf-es">4.4 Configuración en ossec.conf</h3>
+<p>Edita <code>/var/ossec/etc/ossec.conf</code> — sustituye <code>*API_KEY*</code> por el token de BotFather:</p>
+<pre><code>&lt;integration&gt;
+  &lt;name&gt;custom-telegram&lt;/name&gt;
+  &lt;level&gt;3&lt;/level&gt;
+  &lt;hook_url&gt;https://api.telegram.org/bot*API_KEY*/sendMessage&lt;/hook_url&gt;
+  &lt;alert_format&gt;json&lt;/alert_format&gt;
+&lt;/integration&gt;</code></pre>
+<pre><code>systemctl restart wazuh-manager</code></pre>
+<hr>
+
+<h2 id="pruebas-es">5. Pruebas de validación</h2>
+<table><thead><tr><th>Prueba</th><th>Herramienta</th><th>Resultado</th></tr></thead><tbody>
+<tr><td>Intento SSH con Hydra</td><td>Snort + Wazuh</td><td>✅ Detectado — nivel crítico 12</td></tr>
+<tr><td>Escaneo de puertos nmap</td><td>Wazuh</td><td>✅ Detectado en Dashboard</td></tr>
+<tr><td>Crear/modificar/borrar archivo en Desktop</td><td>Wazuh FIM</td><td>✅ Alerta + notificación Telegram</td></tr>
+<tr><td>Notificaciones en tiempo real</td><td>Bot Telegram</td><td>✅ Recibidas al instante</td></tr>
+</tbody></table>
+<hr>
+
+<h2 id="conclusion-es">Conclusión</h2>
+<p>El stack <strong>Wazuh + Snort + Telegram</strong> permite construir un sistema de monitorización funcional con herramientas completamente gratuitas y open source. La integración entre las tres herramientas es viable aunque la visualización de alertas de Snort en el Dashboard de Wazuh 4.9.2 presenta limitaciones conocidas — probablemente ya resueltas en versiones posteriores.</p>
+<p>Las líneas de mejora naturales son la incorporación de un <strong>SOAR</strong> (TheHive + Cortex) para automatizar respuestas, el bloqueo automático de IPs y la escalada a entornos con mayor número de agentes.</p>
+<p><em>Post basado en el TFG "Implementación práctica de un sistema de monitorización, respuesta y notificación en un entorno asequible" — UOC, Jordi Mullor Ruiz, 2025.</em></p>
+
+</div><!-- end lang-es -->
+
+<!-- ═══════════════════ ENGLISH ═══════════════════ -->
+<div lang-en>
+
+<h2 id="intro-en">Introduction</h2>
+<p>This post documents the technical implementation of a security monitoring, detection and alerting system using accessible open source tools. The full stack is based on <strong>Wazuh 4.9.2</strong>, <strong>Snort 2.9.x</strong> on Windows and a <strong>Telegram bot</strong> to send real-time notifications at whatever criticality level you configure.</p>
+
+<p>The resulting architecture:</p>
+
+<!-- DIAGRAMA SVG EN -->
+<svg class="arch-diagram" viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow-en" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#ff00aa"/>
+    </marker>
+    <filter id="glow-c-en">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect x="10" y="30" width="155" height="100" rx="4" fill="rgba(0,20,30,0.8)" stroke="#00fff5" stroke-width="1"/>
+  <text x="87" y="58" font-family="monospace" font-size="11" fill="#00fff5" text-anchor="middle" filter="url(#glow-c-en)">WINDOWS</text>
+  <text x="87" y="76" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">+ Wazuh Agent</text>
+  <text x="87" y="92" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">+ Snort</text>
+  <text x="87" y="118" font-family="monospace" font-size="9" fill="#ff00aa" text-anchor="middle">Monitored endpoint</text>
+  <line x1="167" y1="80" x2="213" y2="80" stroke="#ff00aa" stroke-width="1.5" marker-end="url(#arrow-en)"/>
+  <text x="190" y="72" font-family="monospace" font-size="8" fill="#ff00aa" text-anchor="middle">logs</text>
+  <rect x="215" y="30" width="155" height="100" rx="4" fill="rgba(0,20,30,0.8)" stroke="#00fff5" stroke-width="1"/>
+  <text x="292" y="58" font-family="monospace" font-size="11" fill="#00fff5" text-anchor="middle" filter="url(#glow-c-en)">WAZUH SERVER</text>
+  <text x="292" y="76" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">OVA / VirtualBox</text>
+  <text x="292" y="92" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">Filebeat + Manager</text>
+  <text x="292" y="118" font-family="monospace" font-size="9" fill="#ff00aa" text-anchor="middle">Correlation &amp; rules</text>
+  <line x1="372" y1="80" x2="418" y2="80" stroke="#ff00aa" stroke-width="1.5" marker-end="url(#arrow-en)"/>
+  <text x="395" y="72" font-family="monospace" font-size="8" fill="#ff00aa" text-anchor="middle">alerts</text>
+  <rect x="420" y="30" width="135" height="100" rx="4" fill="rgba(0,20,30,0.8)" stroke="#00fff5" stroke-width="1"/>
+  <text x="487" y="58" font-family="monospace" font-size="11" fill="#00fff5" text-anchor="middle" filter="url(#glow-c-en)">TELEGRAM</text>
+  <text x="487" y="74" font-family="monospace" font-size="11" fill="#00fff5" text-anchor="middle" filter="url(#glow-c-en)">BOT</text>
+  <text x="487" y="95" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">custom-telegram.py</text>
+  <text x="487" y="118" font-family="monospace" font-size="9" fill="#ff00aa" text-anchor="middle">Telegram API</text>
+  <line x1="557" y1="80" x2="600" y2="80" stroke="#ff00aa" stroke-width="1.5" marker-end="url(#arrow-en)"/>
+  <rect x="602" y="30" width="110" height="100" rx="4" fill="rgba(0,20,30,0.8)" stroke="#39ff14" stroke-width="1"/>
+  <text x="657" y="58" font-family="monospace" font-size="9" fill="#39ff14" text-anchor="middle">📱 ALERT</text>
+  <text x="657" y="76" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">Real-time</text>
+  <text x="657" y="92" font-family="monospace" font-size="9" fill="#8899aa" text-anchor="middle">notification</text>
+  <text x="657" y="118" font-family="monospace" font-size="9" fill="#39ff14" text-anchor="middle">level &gt;= 3</text>
+</svg>
+
+<blockquote>⚠️ This content is for educational purposes only. Everything was implemented in a controlled, virtualized environment.</blockquote>
+<hr>
+
+<h2 id="wazuh-en">1. Wazuh — Installation and base configuration</h2>
+<h3 id="wazuh-vm-en">1.1 VM deployment</h3>
+<p>Wazuh provides a preconfigured virtual machine in <code>.ova</code> format including Wazuh Manager, Dashboard, Indexer, Filebeat-OSS and Amazon Linux.<br>
+Download from the <a href="https://documentation.wazuh.com/current/deployment-options/virtual-machine/virtual-machine.html">official Wazuh documentation</a>. Import the <code>.ova</code> in VirtualBox via <strong>File → Import Virtualized Service</strong>.</p>
+<table><thead><tr><th>Resource</th><th>Minimum</th></tr></thead><tbody>
+<tr><td>CPU</td><td>2 cores</td></tr>
+<tr><td>RAM</td><td>2-4 GB</td></tr>
+<tr><td>Storage</td><td>20 GB</td></tr>
+<tr><td>Network</td><td>NAT / Bridged adapter</td></tr>
+</tbody></table>
+
+<h3 id="wazuh-dash-en">1.2 Dashboard access</h3>
+<pre><code>ip a   # get the VM IP</code></pre>
+<p>Browse to <code>https://192.168.1.X</code>. Default credentials: <code>admin / admin</code> — change immediately via Dashboard → user icon → Reset password.</p>
+
+<h3 id="wazuh-agent-en">1.3 Agent installation on Windows</h3>
+<pre><code>/var/ossec/bin/manage_agents</code></pre>
+<p>Select <strong>A</strong> to add agent, enter name and Windows client IP. Extract authentication key with option <strong>E</strong>. Install the agent on Windows from the <a href="https://documentation.wazuh.com/current/installation-guide/wazuh-agent/index.html">official guide</a>, enter server IP and key.<br>
+Verify at: <strong>Dashboard → Server management → Endpoints Summary</strong></p>
+<hr>
+
+<h2 id="snort-en">2. Snort — Installation and configuration on Windows</h2>
+<h3 id="snort-install-en">2.1 Installation</h3>
+<p>Download Snort from <a href="https://www.snort.org/downloads">snort.org/downloads</a>. Follow the installer with default values. When prompted, install <strong>Npcap</strong> from <a href="https://npcap.com/#download">npcap.com</a> for packet capture support.</p>
+
+<h3 id="snort-rules-en">2.2 Preconfigured rules for Windows</h3>
+<p>Use the preconfigured rules from the TFG repository to avoid manual path adjustments:</p>
+<p>👉 <a href="https://github.com/Jmullorru/Snort-Rules-Config_Windows">github.com/Jmullorru/Snort-Rules-Config_Windows</a></p>
+<p>Download the ZIP, extract to <code>c:\Snort</code> confirming file replacements.</p>
+<pre><code>c:\Snort\
+├── bin\  ├── etc\  ├── rules\  ├── preproc_rules\  └── so_rules\</code></pre>
+
+<h3 id="snort-net-en">2.3 Network variable customization</h3>
+<pre><code>ipconfig   # get your IP</code></pre>
+<p>Edit <code>c:\snort\etc\snort.conf</code>:</p>
+<pre><code>ipvar HOME_NET 192.168.1.X</code></pre>
+
+<h3 id="snort-val-en">2.4 Configuration validation</h3>
+<pre><code>cd \snort\bin
+snort -W                                    # list interfaces
+snort -c c:\snort\etc\snort.conf -T -i #   # # = interface number</code></pre>
+<p>Expected output: <code>Snort successfully validated the configuration!</code></p>
+<hr>
+
+<h2 id="integration-en">3. Snort → Wazuh integration</h2>
+<h3 id="shared-en">3.1 Shared folder in VirtualBox</h3>
+<p>With Wazuh VM off, go to <strong>Settings → Shared Folders</strong>:</p>
+<ul>
+<li><strong>Path:</strong> <code>c:\snort\log</code></li>
+<li><strong>Name:</strong> <code>log</code></li>
+<li><strong>Auto-mount:</strong> ✅ &nbsp; <strong>Make permanent:</strong> ✅</li>
+</ul>
+<p>After boot, the folder will be available at <code>/media/sf_log</code>.</p>
+
+<h3 id="filebeat-en">3.2 Filebeat configuration</h3>
+<pre><code>vim /etc/filebeat/filebeat.yml</code></pre>
+<p>Add after <code>filebeat.modules</code>:</p>
+<pre><code>filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /media/sf_log/alert.ids
+    fields:
+      log_type: snort
+    fields_under_root: true</code></pre>
+<pre><code>filebeat test config    # → Config OK
+filebeat test output    # → Connection OK with Elasticsearch
+filebeat -e -d "input"  # → Verify real-time monitoring</code></pre>
+
+<h3 id="logtest-en">3.3 Validation with wazuh-logtest</h3>
+<pre><code>/var/ossec/bin/wazuh-logtest</code></pre>
+<p>Insert a sample log:</p>
+<pre><code>12/21-23:12:18.777511 [**] [1:1000002:1] Critical Alert - SSH access attempt
+detected [**] [Priority: 1] {TCP} 192.168.1.XX:63855 -> 192.168.1.XX:22</code></pre>
+<p>Wazuh processes it in 3 phases: <strong>Pre-decoding</strong> → <strong>Decoding</strong> (IPs, protocol, source: snort) → <strong>Filtering</strong> (assigns rule and alert level).</p>
+
+<h3 id="rules-en">3.4 Custom rules and decoders</h3>
+<p><strong>Decoder</strong> (<code>/var/ossec/etc/decoders/local_decoder.xml</code>):</p>
+<pre><code>&lt;decoder name="snort"&gt;
+  &lt;type&gt;ids&lt;/type&gt;
+  &lt;prematch&gt;[**] [\d+:\d+:\d+] &lt;/prematch&gt;
+&lt;/decoder&gt;</code></pre>
+
+<p><strong>Rules</strong> (<code>/var/ossec/etc/rules/local_rules.xml</code>):</p>
+<pre><code>&lt;group name="snort_ssh"&gt;
+  &lt;rule id="100010" level="12"&gt;
+    &lt;decoded_as&gt;snort_ssh&lt;/decoded_as&gt;
+    &lt;description&gt;Snort: Critical Alert - SSH access attempt detected&lt;/description&gt;
+  &lt;/rule&gt;
+&lt;/group&gt;
+
+&lt;group name="snort_portScan"&gt;
+  &lt;rule id="100011" level="12"&gt;
+    &lt;decoded_as&gt;snort_portScan&lt;/decoded_as&gt;
+    &lt;description&gt;Snort: Port scan detected&lt;/description&gt;
+  &lt;/rule&gt;
+&lt;/group&gt;</code></pre>
+
+<h3 id="ossec-en">3.5 Real-time path monitoring</h3>
+<p>In <code>C:\Program Files (x86)\ossec-agent\ossec.conf</code>, after the 32-bit block:</p>
+<pre><code>&lt;directories realtime="yes" report_changes="yes" check_all="yes"&gt;
+  C:\Users\YOUR_USER\Desktop
+&lt;/directories&gt;</code></pre>
+<blockquote>⚠️ <strong>Wazuh 4.9.2 note:</strong> Snort alerts are processed correctly but may not appear in the Dashboard. This is a known community limitation, likely resolved in later versions. Alerts remain fully functional at rule and Telegram notification level.</blockquote>
+<hr>
+
+<h2 id="telegram-en">4. Telegram bot for real-time alerts</h2>
+<h3 id="botfather-en">4.1 Bot creation with BotFather</h3>
+<ol>
+<li>Open Telegram → search <strong>@BotFather</strong> (verified ✓ profile)</li>
+<li>Run <code>/newbot</code></li>
+<li>Assign name and username ending in <code>_bot</code></li>
+<li>Save the <strong>API token</strong></li>
+<li>Run <code>/start</code> in the new bot</li>
+</ol>
+
+<h3 id="group-en">4.2 Notification group</h3>
+<p>Create a Telegram group (e.g. <code>MySOC_WazuhAlerts</code>) and add the bot as member.<br>
+Find the <strong>Chat ID</strong> in Telegram Web URL:</p>
+<pre><code>web.telegram.org/a/#-4793XXXX
+                    ^^^^^^^^^^^ this is the ID (includes the minus sign -)</code></pre>
+
+<h3 id="integration-wazuh-en">4.3 Wazuh integration</h3>
+<pre><code>nano /var/ossec/integrations/custom-telegram</code></pre>
+<pre><code>#!/bin/sh
+WPYTHON_BIN="framework/python/bin/python3"
+SCRIPT_PATH_NAME="$0"
+DIR_NAME="$(cd $(dirname ${SCRIPT_PATH_NAME}); pwd -P)"
+SCRIPT_NAME="$(basename ${SCRIPT_PATH_NAME})"
+case ${DIR_NAME} in
+  */active-response/bin | */wodles*)
+    WAZUH_PATH="$(cd ${DIR_NAME}/../..; pwd)"
+    PYTHON_SCRIPT="${DIR_NAME}/${SCRIPT_NAME}.py" ;;
+  */bin)
+    WAZUH_PATH="$(cd ${DIR_NAME}/..; pwd)"
+    PYTHON_SCRIPT="${WAZUH_PATH}/framework/scripts/${SCRIPT_NAME}.py" ;;
+  */integrations)
+    WAZUH_PATH="$(cd ${DIR_NAME}/..; pwd)"
+    PYTHON_SCRIPT="${DIR_NAME}/${SCRIPT_NAME}.py" ;;
+esac
+${WAZUH_PATH}/${WPYTHON_BIN} ${PYTHON_SCRIPT} "$@"</code></pre>
+
+<pre><code>nano /var/ossec/integrations/custom-telegram.py</code></pre>
+<pre><code>#!/usr/bin/env python
+import sys, json, requests
+
+CHAT_ID="-YOUR_CHAT_ID"  # replace with your group ID
+
+alert_file = open(sys.argv[1])
+hook_url   = sys.argv[3]
+alert_json = json.loads(alert_file.read())
+alert_file.close()
+
+alert_level = alert_json['rule']['level']       if 'level'       in alert_json['rule']  else "N/A"
+description = alert_json['rule']['description'] if 'description' in alert_json['rule']  else "N/A"
+agent       = alert_json['agent']['name']        if 'name'        in alert_json['agent'] else "N/A"
+
+msg_data = {'chat_id': CHAT_ID, 'text': {
+    'description': description,
+    'alert_level': str(alert_level),
+    'agent': agent
+}}
+headers = {'content-type': 'application/json', 'Accept-Charset': 'UTF-8'}
+requests.post(hook_url, headers=headers, data=json.dumps(msg_data))
+sys.exit(0)</code></pre>
+
+<pre><code>chown root:wazuh /var/ossec/integrations/custom-telegram*
+chmod 750 /var/ossec/integrations/custom-telegram*</code></pre>
+
+<h3 id="ossecconf-en">4.4 ossec.conf configuration</h3>
+<p>Edit <code>/var/ossec/etc/ossec.conf</code> — replace <code>*API_KEY*</code> with your BotFather token:</p>
+<pre><code>&lt;integration&gt;
+  &lt;name&gt;custom-telegram&lt;/name&gt;
+  &lt;level&gt;3&lt;/level&gt;
+  &lt;hook_url&gt;https://api.telegram.org/bot*API_KEY*/sendMessage&lt;/hook_url&gt;
+  &lt;alert_format&gt;json&lt;/alert_format&gt;
+&lt;/integration&gt;</code></pre>
+<pre><code>systemctl restart wazuh-manager</code></pre>
+<hr>
+
+<h2 id="tests-en">5. Validation tests</h2>
+<table><thead><tr><th>Test</th><th>Tool</th><th>Result</th></tr></thead><tbody>
+<tr><td>SSH attempt with Hydra</td><td>Snort + Wazuh</td><td>✅ Detected — critical level 12</td></tr>
+<tr><td>nmap port scan</td><td>Wazuh</td><td>✅ Detected in Dashboard</td></tr>
+<tr><td>Create/modify/delete file on Desktop</td><td>Wazuh FIM</td><td>✅ Alert + Telegram notification</td></tr>
+<tr><td>Real-time notifications</td><td>Telegram Bot</td><td>✅ Received instantly</td></tr>
+</tbody></table>
+<hr>
+
+<h2 id="conclusion-en">Conclusion</h2>
+<p>The <strong>Wazuh + Snort + Telegram</strong> stack lets you build a functional monitoring system with entirely free, open source tools. Integration between the three tools works well, though Snort alert visualization in the Wazuh 4.9.2 Dashboard has known limitations — likely resolved in later versions.</p>
+<p>Natural improvement paths include adding a <strong>SOAR</strong> (TheHive + Cortex) to automate responses, automatic IP blocking, and scaling to environments with more agents.</p>
+<p><em>Post based on the Bachelor's Final Project "Practical implementation of a monitoring, response and notification system in an affordable environment" — UOC, Jordi Mullor Ruiz, 2025.</em></p>
+
+</div><!-- end lang-en -->
+
+      <hr class="divider">
+      <div style="margin-top:32px;">
+        <a href="../../blog.html" style="background:var(--dark2);border:1px solid var(--border);padding:16px 22px;text-decoration:none;color:var(--text);font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;transition:border-color .2s,background .2s;display:inline-block;" onmouseover="this.style.borderColor='rgba(0,255,245,.25)';this.style.background='var(--dark3)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--dark2)'">← BACK TO BLOG</a>
+      </div>
+    </article>
+
+    <aside class="toc">
+      <h4>// INDEX</h4>
+      <ul>
+        <li><a href="#intro-es" class="lang-es-toc">Introducción</a><a href="#intro-en" class="lang-en-toc" style="display:none">Introduction</a></li>
+        <li><a href="#wazuh-es" class="lang-es-toc">1. Wazuh</a><a href="#wazuh-en" class="lang-en-toc" style="display:none">1. Wazuh</a></li>
+        <li class="toc-sub"><a href="#wazuh-vm-es" class="lang-es-toc">1.1 Despliegue VM</a><a href="#wazuh-vm-en" class="lang-en-toc" style="display:none">1.1 VM deployment</a></li>
+        <li class="toc-sub"><a href="#wazuh-dash-es" class="lang-es-toc">1.2 Dashboard</a><a href="#wazuh-dash-en" class="lang-en-toc" style="display:none">1.2 Dashboard</a></li>
+        <li class="toc-sub"><a href="#wazuh-agent-es" class="lang-es-toc">1.3 Agente Windows</a><a href="#wazuh-agent-en" class="lang-en-toc" style="display:none">1.3 Agent Windows</a></li>
+        <li><a href="#snort-es" class="lang-es-toc">2. Snort</a><a href="#snort-en" class="lang-en-toc" style="display:none">2. Snort</a></li>
+        <li class="toc-sub"><a href="#snort-install-es" class="lang-es-toc">2.1 Instalación</a><a href="#snort-install-en" class="lang-en-toc" style="display:none">2.1 Installation</a></li>
+        <li class="toc-sub"><a href="#snort-rules-es" class="lang-es-toc">2.2 Reglas</a><a href="#snort-rules-en" class="lang-en-toc" style="display:none">2.2 Rules</a></li>
+        <li class="toc-sub"><a href="#snort-net-es" class="lang-es-toc">2.3 Variables de red</a><a href="#snort-net-en" class="lang-en-toc" style="display:none">2.3 Network vars</a></li>
+        <li class="toc-sub"><a href="#snort-val-es" class="lang-es-toc">2.4 Validación</a><a href="#snort-val-en" class="lang-en-toc" style="display:none">2.4 Validation</a></li>
+        <li><a href="#integracion-es" class="lang-es-toc">3. Integración Snort→Wazuh</a><a href="#integration-en" class="lang-en-toc" style="display:none">3. Snort→Wazuh</a></li>
+        <li class="toc-sub"><a href="#shared-es" class="lang-es-toc">3.1 Carpeta compartida</a><a href="#shared-en" class="lang-en-toc" style="display:none">3.1 Shared folder</a></li>
+        <li class="toc-sub"><a href="#filebeat-es" class="lang-es-toc">3.2 Filebeat</a><a href="#filebeat-en" class="lang-en-toc" style="display:none">3.2 Filebeat</a></li>
+        <li class="toc-sub"><a href="#logtest-es" class="lang-es-toc">3.3 wazuh-logtest</a><a href="#logtest-en" class="lang-en-toc" style="display:none">3.3 wazuh-logtest</a></li>
+        <li class="toc-sub"><a href="#rules-es" class="lang-es-toc">3.4 Reglas y decoders</a><a href="#rules-en" class="lang-en-toc" style="display:none">3.4 Rules &amp; decoders</a></li>
+        <li class="toc-sub"><a href="#ossec-es" class="lang-es-toc">3.5 Monitorización rutas</a><a href="#ossec-en" class="lang-en-toc" style="display:none">3.5 Path monitoring</a></li>
+        <li><a href="#telegram-es" class="lang-es-toc">4. Bot Telegram</a><a href="#telegram-en" class="lang-en-toc" style="display:none">4. Telegram Bot</a></li>
+        <li class="toc-sub"><a href="#botfather-es" class="lang-es-toc">4.1 BotFather</a><a href="#botfather-en" class="lang-en-toc" style="display:none">4.1 BotFather</a></li>
+        <li class="toc-sub"><a href="#grupo-es" class="lang-es-toc">4.2 Grupo Telegram</a><a href="#group-en" class="lang-en-toc" style="display:none">4.2 Telegram group</a></li>
+        <li class="toc-sub"><a href="#integracion-wazuh-es" class="lang-es-toc">4.3 Integración Wazuh</a><a href="#integration-wazuh-en" class="lang-en-toc" style="display:none">4.3 Wazuh integration</a></li>
+        <li class="toc-sub"><a href="#ossecconf-es" class="lang-es-toc">4.4 ossec.conf</a><a href="#ossecconf-en" class="lang-en-toc" style="display:none">4.4 ossec.conf</a></li>
+        <li><a href="#pruebas-es" class="lang-es-toc">5. Pruebas</a><a href="#tests-en" class="lang-en-toc" style="display:none">5. Tests</a></li>
+        <li><a href="#conclusion-es" class="lang-es-toc">Conclusión</a><a href="#conclusion-en" class="lang-en-toc" style="display:none">Conclusion</a></li>
+      </ul>
+    </aside>
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrapper">
+    <div class="footer-logo">THE<em>//</em>VAULT</div>
+    <ul class="footer-links">
+      <li><a href="https://github.com/ST3G4N05" target="_blank">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/jordi-mr/">LinkedIn</a></li>
+    </ul>
+    <p class="footer-copy">© 2025 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</p>
+  </div>
+</footer>
+</div>
+
+<script src="../../js/vault.js"></script>
+<script src="../../js/i18n.js"></script>
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const el  = document.getElementById('post-content');
+    const bar = document.getElementById('progress');
+    if (!el || !bar) return;
+    const total   = el.offsetHeight - window.innerHeight;
+    const scrolled = Math.max(0, -el.getBoundingClientRect().top);
+    bar.style.width = Math.min(100, (scrolled / total) * 100) + '%';
+  });
+
+  // TOC bilingüe — sincronizar con el idioma activo
+  function syncTocLang(lang) {
+    document.querySelectorAll('.lang-es-toc').forEach(el => {
+      el.style.display = lang === 'es' ? '' : 'none';
+    });
+    document.querySelectorAll('.lang-en-toc').forEach(el => {
+      el.style.display = lang === 'en' ? '' : 'none';
+    });
+  }
+  // Aplicar idioma inicial y observar cambios
+  document.addEventListener('DOMContentLoaded', () => {
+    const lang = localStorage.getItem('vault_lang') || 'es';
+    syncTocLang(lang);
+  });
+  // Observar cambios de idioma via MutationObserver sobre el atributo lang del html
+  new MutationObserver(() => {
+    syncTocLang(document.documentElement.lang || 'es');
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+</script>
+</body>
+</html>
