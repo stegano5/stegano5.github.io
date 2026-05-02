@@ -37,13 +37,8 @@
     </div>
 
     <!-- TERMINAL -->
-    <!--<div class="reveal" style="margin-bottom:70px;">
-      <div class="terminal" style="max-width:700px;"> --> 
-    
-    <!-- TERMINAL + INDEX TERMINAL -->
-    <div class="resources-terminal-grid reveal" style="margin-bottom:70px;">
-    <div class="terminal">
-     <!-- FIN ADDED de TERMINAL + INDEX TERMINAL -->
+    <div class="reveal" style="margin-bottom:70px;">
+      <div class="terminal" style="max-width:700px;">
         <div class="terminal-bar">
           <div class="tb-dot r"></div><div class="tb-dot y"></div><div class="tb-dot g"></div>
           <span class="tb-title">arsenal@vault:~$ — resource locator</span>
@@ -53,56 +48,45 @@
           <span style="display:block;color:var(--cyan)">  recon/  &nbsp; exploitation/  &nbsp; post-exp/  &nbsp; dfir/  &nbsp; cheatsheets/</span>
           <span style="display:block"><span class="t-prompt">vault@arsenal</span><span class="t-cmd">:~$ </span><span class="t-cmd">cat tools/index.json | grep category</span></span>
           <span style="display:block;color:var(--text-dim)">  <span class="t-g">[+]</span> 12 categories  &nbsp; <span class="t-g">[+]</span> 47 tools  &nbsp; <span class="t-g">[+]</span> 23 cheatsheets</span>
+          <!-- NEW SECTION ON TEMRINAL INDEX INTERACTIVE-->
           <span style="display:block"><span class="t-prompt">vault@arsenal</span><span class="t-cmd">:~$ </span><span id="typed-cmd" data-text="./load_arsenal.sh --all"></span><span class="cursor"></span></span>
-        </div>
-      </div>
-    </div>
-    <!-- TERMINAL + INDEX TERMINAL -->
-    <div class="terminal terminal-index">
-        <div class="terminal-bar">
-          <div class="tb-dot r"></div><div class="tb-dot y"></div><div class="tb-dot g"></div>
-          <span class="tb-title">vault@resources:~$ — section index</span>
-        </div>
-
-        <div class="terminal-body">
+          <div class="terminal-section-index">
           <span style="display:block">
             <span class="t-prompt">vault@index</span><span class="t-cmd">:~$ </span>
             <span class="t-cmd">cat sections.map</span>
           </span>
-
+        
           <a class="terminal-link" href="#cheatsheets">
             <span class="t-g">[01]</span>
             <span>CHEATSHEETS</span>
           </a>
-
+        
           <a class="terminal-link" href="#repository-labs">
             <span class="t-g">[02]</span>
             <span>REPOSITORY LABS</span>
           </a>
-
+        
           <a class="terminal-link" href="#essential-tools">
             <span class="t-g">[03]</span>
             <span>ESSENTIAL TOOLS</span>
           </a>
-
+        
           <a class="terminal-link" href="#posts-recursos">
             <span class="t-g">[04]</span>
             <span>POSTS RECURSOS</span>
           </a>
-
           <span style="display:block;margin-top:14px;">
             <span class="t-prompt">vault@index</span><span class="t-cmd">:~$ </span>
             <span class="t-c">select --section</span><span class="cursor"></span>
           </span>
+          </div>
+          <!-- END NEW SECTION ON TEMRINAL INDEX INTERACTIVE-->
         </div>
       </div>
     </div>
-    <!-- FIN TERMINAL + INDEX TERMINAL -->
-  
+      
     <!-- CHEATSHEETS -->
-    <!--<section style="margin-bottom:90px;" class="reveal">  # OLD -->
-    <section id="cheatsheets" style="margin-bottom:90px;" class="reveal"> 
-    <!-- END NEW -->
+    <<section style="margin-bottom:90px;" class="reveal">     
       <div class="sec-head">
         <span class="sec-num">01 //</span>
         <div class="sec-line"></div>
@@ -205,9 +189,7 @@
     </section>
 
     <!-- TOOLS TABLE -->
-    <!--<section style="margin-bottom:90px;" class="reveal"> # OLD -->
-    <section id="essential-tools" style="margin-bottom:90px;" class="reveal">
-    <!-- END NEW -->
+    <section style="margin-bottom:90px;" class="reveal"> 
      <div class="sec-head">
         <span class="sec-num">03 //</span>
         <div class="sec-line"></div>
@@ -401,10 +383,7 @@
     </section>
 
     <!-- POSTS RECURSOS — auto desde posts/index.json + localStorage -->
-    <!--<section style="margin-bottom:90px;" class="reveal"> OLD-->
-    <!-- NEW -->
-    <section id="posts-recursos" style="margin-bottom:90px;" class="reveal"> 
-    <!-- END NEW -->
+    <section style="margin-bottom:90px;" class="reveal">    
       <div class="sec-head">
         <span class="sec-num">04 //</span>
         <div class="sec-line"></div>
