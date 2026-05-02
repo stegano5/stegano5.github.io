@@ -297,6 +297,8 @@ nav {
 .badge.o {color: var(--orange); border: 1px solid rgba(255,106,0,.40); box-shadow: 0 0 8px #ff6a00, 0 0 24px rgba(255,106,0,.25); }
 /*Color Para futura sección de LABS*/
 .badge.w {color: #ffffff; border: 1px solid rgba(255,255,255,.45); box-shadow: 0 0 8px rgba(255,255,255,.35), 0 0 24px rgba(255,255,255,.15); }
+.post-cat.yellow { color: var(--yellow); border-color: var(--yellow); box-shadow: 0 0 6px rgba(255,229,0,.15); }
+.post-cat.white  { color: #d0dde8; border-color: rgba(168,192,204,.4); }
 
 /* ═══════════════════════════
    POST CONTENT (article page)
