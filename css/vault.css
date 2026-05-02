@@ -586,6 +586,10 @@ footer {
    RESOURCES — TERMINAL INTERACTIVO DEL INDEX INSIDE TERMINAL
 ═══════════════════════════ */
 
+.hidden {
+  display: none !important;
+}
+
 .terminal-section-index {
   margin-top: 10px;
   padding-top: 0;
@@ -608,9 +612,17 @@ footer {
 }
 
 .loader-blocks {
-  color: var(--cyan);
-  text-shadow: var(--glow-c);
   letter-spacing: 0;
+}
+
+#loader-filled {
+  color: var(--magenta);
+  text-shadow: var(--glow-m);
+}
+
+#loader-empty {
+  color: rgba(255,255,255,.22);
+  text-shadow: none;
 }
 
 .loader-loaded {
@@ -633,6 +645,10 @@ footer {
   text-decoration: none;
   border-bottom: 1px solid rgba(0,255,245,.08);
   transition: color .2s, text-shadow .2s, padding-left .2s;
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 30;
 }
 
 .terminal-link:hover {
@@ -644,4 +660,9 @@ footer {
 .terminal-link:hover .t-g {
   color: var(--magenta);
   text-shadow: var(--glow-m);
+}
+
+.terminal-body {
+  position: relative;
+  z-index: 20;
 }
