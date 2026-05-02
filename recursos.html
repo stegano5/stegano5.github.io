@@ -37,8 +37,13 @@
     </div>
 
     <!-- TERMINAL -->
-    <div class="reveal" style="margin-bottom:70px;">
-      <div class="terminal" style="max-width:700px;">
+    <!--<div class="reveal" style="margin-bottom:70px;">
+      <div class="terminal" style="max-width:700px;"> --> 
+    
+    <!-- TERMINAL + INDEX TERMINAL -->
+    <div class="resources-terminal-grid reveal" style="margin-bottom:70px;">
+    <div class="terminal">
+     <!-- FIN ADDED de TERMINAL + INDEX TERMINAL -->
         <div class="terminal-bar">
           <div class="tb-dot r"></div><div class="tb-dot y"></div><div class="tb-dot g"></div>
           <span class="tb-title">arsenal@vault:~$ — resource locator</span>
@@ -52,9 +57,52 @@
         </div>
       </div>
     </div>
+    <!-- TERMINAL + INDEX TERMINAL -->
+    <div class="terminal terminal-index">
+        <div class="terminal-bar">
+          <div class="tb-dot r"></div><div class="tb-dot y"></div><div class="tb-dot g"></div>
+          <span class="tb-title">vault@resources:~$ — section index</span>
+        </div>
 
+        <div class="terminal-body">
+          <span style="display:block">
+            <span class="t-prompt">vault@index</span><span class="t-cmd">:~$ </span>
+            <span class="t-cmd">cat sections.map</span>
+          </span>
+
+          <a class="terminal-link" href="#cheatsheets">
+            <span class="t-g">[01]</span>
+            <span>CHEATSHEETS</span>
+          </a>
+
+          <a class="terminal-link" href="#repository-labs">
+            <span class="t-g">[02]</span>
+            <span>REPOSITORY LABS</span>
+          </a>
+
+          <a class="terminal-link" href="#essential-tools">
+            <span class="t-g">[03]</span>
+            <span>ESSENTIAL TOOLS</span>
+          </a>
+
+          <a class="terminal-link" href="#posts-recursos">
+            <span class="t-g">[04]</span>
+            <span>POSTS RECURSOS</span>
+          </a>
+
+          <span style="display:block;margin-top:14px;">
+            <span class="t-prompt">vault@index</span><span class="t-cmd">:~$ </span>
+            <span class="t-c">select --section</span><span class="cursor"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <!-- FIN TERMINAL + INDEX TERMINAL -->
+  
     <!-- CHEATSHEETS -->
-    <section style="margin-bottom:90px;" class="reveal">
+    <!--<section style="margin-bottom:90px;" class="reveal">  # OLD -->
+    <section id="cheatsheets" style="margin-bottom:90px;" class="reveal"> 
+    <!-- END NEW -->
       <div class="sec-head">
         <span class="sec-num">01 //</span>
         <div class="sec-line"></div>
@@ -106,10 +154,62 @@
       </div>
     </section>
 
-    <!-- TOOLS TABLE -->
-    <section style="margin-bottom:90px;" class="reveal">
+    <!-- REPOSITORY LABS -->
+    <section id="repository-labs" style="margin-bottom:90px;" class="reveal">
       <div class="sec-head">
         <span class="sec-num">02 //</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title">
+          <span style="color:#fff;text-shadow:none;">REPOSITORY</span>
+          <span style="color:#fff;text-shadow:0 0 8px rgba(255,255,255,.35),0 0 24px rgba(255,255,255,.15);">LABS</span>
+        </h2>
+      </div>
+    
+      <div class="cards-grid">
+        <a href="blog.html?filter=labs&tag=forensics" class="card lab-card">
+          <div class="card-tag w"><div class="tag-dot"></div>FORENSICS</div>
+          <span class="card-icon">🧬</span>
+          <h3>FORENSICS LABS</h3>
+          <p>Laboratorios de análisis forense, memoria RAM, artefactos del sistema, timelines, logs y evidencias digitales.</p>
+          <div class="chip-list">
+            <span class="chip w">MEMORY</span>
+            <span class="chip w">TIMELINE</span>
+            <span class="chip w">ARTIFACTS</span>
+          </div>
+        </a>
+    
+        <a href="blog.html?filter=labs&tag=offensive" class="card lab-card">
+          <div class="card-tag w"><div class="tag-dot"></div>OFFENSIVE</div>
+          <span class="card-icon">⚔️</span>
+          <h3>OFFENSIVE LABS</h3>
+          <p>Entornos controlados para explotación, enumeración, escalada de privilegios, Active Directory y post-explotación.</p>
+          <div class="chip-list">
+            <span class="chip w">EXPLOIT</span>
+            <span class="chip w">PRIVESC</span>
+            <span class="chip w">AD</span>
+          </div>
+        </a>
+    
+        <a href="blog.html?filter=labs&tag=defensive" class="card lab-card">
+          <div class="card-tag w"><div class="tag-dot"></div>DEFENSIVE</div>
+          <span class="card-icon">🛡️</span>
+          <h3>DEFENSIVE LABS</h3>
+          <p>Laboratorios defensivos para SIEM, detección, hardening, monitorización, alertas, reglas Sigma y respuesta a incidentes.</p>
+          <div class="chip-list">
+            <span class="chip w">SIEM</span>
+            <span class="chip w">DETECTION</span>
+            <span class="chip w">IR</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- TOOLS TABLE -->
+    <!--<section style="margin-bottom:90px;" class="reveal"> # OLD -->
+    <section id="essential-tools" style="margin-bottom:90px;" class="reveal">
+    <!-- END NEW -->
+     <div class="sec-head">
+        <span class="sec-num">03 //</span>
         <div class="sec-line"></div>
         <h2 class="sec-title"><span style="color:#fff;text-shadow:none;" data-i18n="rc.sec2.title">ESSENTIAL</span> <span style="color:var(--green);text-shadow:var(--glow-g);"><span data-i18n="rc.sec2.span">TOOLS</span></span></h2>
       </div>
@@ -301,9 +401,12 @@
     </section>
 
     <!-- POSTS RECURSOS — auto desde posts/index.json + localStorage -->
-    <section style="margin-bottom:90px;" class="reveal">
+    <!--<section style="margin-bottom:90px;" class="reveal"> OLD-->
+    <!-- NEW -->
+    <section id="posts-recursos" style="margin-bottom:90px;" class="reveal"> 
+    <!-- END NEW -->
       <div class="sec-head">
-        <span class="sec-num">03 //</span>
+        <span class="sec-num">04 //</span>
         <div class="sec-line"></div>
         <h2 class="sec-title"><span style="color:#fff;text-shadow:none;" data-i18n="rc.sec3.title">POSTS</span> <span style="color:var(--green);text-shadow:var(--glow-g);"><span data-i18n="rc.sec3.span">RECURSOS</span></span></h2>
       </div>
