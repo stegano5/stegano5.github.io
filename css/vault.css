@@ -581,3 +581,39 @@ footer {
 .post-cat.orange { color: var(--orange); border-color: var(--orange);  box-shadow: 0 0 8px #ff6a00, 0 0 24px rgba(255,106,0,.25); }
 .post-cat.white,
 .post-cat.labs {color: #ffffff; border-color: rgba(255,255,255,.65); box-shadow: 0 0 8px rgba(255,255,255,.35), 0 0 24px rgba(255,255,255,.15); }
+
+/* ═══════════════════════════
+   RESOURCES — TERMINAL INTERACTIVO DEL INDEX INSIDE TERMINAL
+═══════════════════════════ */
+
+.terminal-section-index {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0,255,245,.12);
+}
+
+.terminal-link {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 7px 0;
+  font-family: var(--font-mono);
+  font-size: .76rem;
+  letter-spacing: .12em;
+  color: var(--text-dim);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0,255,245,.08);
+  transition: color .2s, text-shadow .2s, padding-left .2s;
+}
+
+.terminal-link:hover {
+  color: var(--cyan);
+  text-shadow: var(--glow-c);
+  padding-left: 8px;
+}
+
+.terminal-link:hover .t-g {
+  color: var(--magenta);
+  text-shadow: var(--glow-m);
+}
