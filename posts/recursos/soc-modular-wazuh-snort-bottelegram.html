@@ -138,7 +138,6 @@
 </svg>
 
 <blockquote>⚠️ Este contenido es de carácter educativo. Todo fue implementado en un entorno controlado y virtualizado.</blockquote>
-<hr>
 
 <h2 id="wazuh-es">1. Wazuh — Instalación y configuración base</h2>
 <h3 id="wazuh-vm-es">1.1 Despliegue de la VM</h3>
@@ -168,7 +167,6 @@ Credenciales por defecto: <code>admin / admin</code>. Cámbialas desde el Dashbo
 <p>Selecciona <strong>A</strong> para añadir agente, introduce nombre e IP del cliente Windows. Extrae la clave de autenticación con opción <strong>E</strong>.</p>
 <p>En el cliente Windows instala el agente desde la <a href="https://documentation.wazuh.com/current/installation-guide/wazuh-agent/index.html">guía oficial</a>, introduce la IP del servidor y la clave.<br>
 Verifica en: <strong>Dashboard → Server management → Endpoints Summary</strong></p>
-<hr>
 
 <h2 id="snort-es">2. Snort — Instalación y configuración en Windows</h2>
 <h3 id="snort-install-es">2.1 Instalación</h3>
@@ -195,7 +193,6 @@ ipvar HOME_NET 192.168.1.X</code></pre>
 snort -W                                    # listar interfaces
 snort -c c:\snort\etc\snort.conf -T -i #   # # = número de interfaz</code></pre>
 <p>Resultado esperado: <code>Snort successfully validated the configuration!</code></p>
-<hr>
 
 <h2 id="integracion-es">3. Integración Snort → Wazuh</h2>
 <h3 id="shared-es">3.1 Carpeta compartida en VirtualBox</h3>
@@ -264,7 +261,6 @@ detectado [**] [Priority: 1] {TCP} 192.168.1.XX:63855 -> 192.168.1.XX:22</code><
   C:\Users\TU_USUARIO\Desktop
 &lt;/directories&gt;</code></pre>
 <blockquote>⚠️ <strong>Nota Wazuh 4.9.2:</strong> Las alertas de Snort se procesan correctamente pero pueden no visualizarse en el Dashboard. Limitación conocida en la comunidad, probablemente ya resuelta en versiones posteriores. Las alertas sí funcionan a nivel de reglas y notificaciones Telegram.</blockquote>
-<hr>
 
 <h2 id="telegram-es">4. Bot de Telegram para alertas en tiempo real</h2>
 <p>Último paso: un bot de Telegram que reciba las alertas de Wazuh y las reenvíe al instante. Configura bien el nivel mínimo de alerta o tu teléfono no parará de sonar 🔔</p>
@@ -343,7 +339,6 @@ chmod 750 /var/ossec/integrations/custom-telegram*</code></pre>
   &lt;alert_format&gt;json&lt;/alert_format&gt;
 &lt;/integration&gt;</code></pre>
 <pre><code>systemctl restart wazuh-manager</code></pre>
-<hr>
 
 <h2 id="pruebas-es">5. Pruebas de validación</h2>
 <table><thead><tr><th>Prueba</th><th>Herramienta</th><th>Resultado</th></tr></thead><tbody>
@@ -352,7 +347,6 @@ chmod 750 /var/ossec/integrations/custom-telegram*</code></pre>
 <tr><td>Crear/modificar/borrar archivo en Desktop</td><td>Wazuh FIM</td><td>✅ Alerta + notificación Telegram</td></tr>
 <tr><td>Notificaciones en tiempo real</td><td>Bot Telegram</td><td>✅ Recibidas al instante</td></tr>
 </tbody></table>
-<hr>
 
 <h2 id="conclusion-es">Conclusión</h2>
 <p>El stack <strong>Wazuh + Snort + Telegram</strong> permite construir un sistema de monitorización funcional con herramientas completamente gratuitas y open source. La integración entre las tres herramientas es viable aunque la visualización de alertas de Snort en el Dashboard de Wazuh 4.9.2 presenta limitaciones conocidas — probablemente ya resueltas en versiones posteriores.</p>
@@ -408,7 +402,6 @@ chmod 750 /var/ossec/integrations/custom-telegram*</code></pre>
 </svg>
 
 <blockquote>⚠️ This content is for educational purposes only. Everything was implemented in a controlled, virtualized environment.</blockquote>
-<hr>
 
 <h2 id="wazuh-en">1. Wazuh — Installation and base configuration</h2>
 <h3 id="wazuh-vm-en">1.1 VM deployment</h3>
@@ -433,7 +426,6 @@ Download from the <a href="https://documentation.wazuh.com/current/deployment-op
 <pre><code>/var/ossec/bin/manage_agents</code></pre>
 <p>Select <strong>A</strong> to add agent, enter name and Windows client IP. Extract authentication key with option <strong>E</strong>. Install the agent on Windows from the <a href="https://documentation.wazuh.com/current/installation-guide/wazuh-agent/index.html">official guide</a>, enter server IP and key.<br>
 Verify at: <strong>Dashboard → Server management → Endpoints Summary</strong></p>
-<hr>
 
 <h2 id="snort-en">2. Snort — Installation and configuration on Windows</h2>
 <h3 id="snort-install-en">2.1 Installation</h3>
@@ -456,7 +448,6 @@ Verify at: <strong>Dashboard → Server management → Endpoints Summary</strong
 snort -W                                    # list interfaces
 snort -c c:\snort\etc\snort.conf -T -i #   # # = interface number</code></pre>
 <p>Expected output: <code>Snort successfully validated the configuration!</code></p>
-<hr>
 
 <h2 id="integration-en">3. Snort → Wazuh integration</h2>
 <h3 id="shared-en">3.1 Shared folder in VirtualBox</h3>
@@ -518,7 +509,6 @@ detected [**] [Priority: 1] {TCP} 192.168.1.XX:63855 -> 192.168.1.XX:22</code></
   C:\Users\YOUR_USER\Desktop
 &lt;/directories&gt;</code></pre>
 <blockquote>⚠️ <strong>Wazuh 4.9.2 note:</strong> Snort alerts are processed correctly but may not appear in the Dashboard. This is a known community limitation, likely resolved in later versions. Alerts remain fully functional at rule and Telegram notification level.</blockquote>
-<hr>
 
 <h2 id="telegram-en">4. Telegram bot for real-time alerts</h2>
 <h3 id="botfather-en">4.1 Bot creation with BotFather</h3>
@@ -592,7 +582,6 @@ chmod 750 /var/ossec/integrations/custom-telegram*</code></pre>
   &lt;alert_format&gt;json&lt;/alert_format&gt;
 &lt;/integration&gt;</code></pre>
 <pre><code>systemctl restart wazuh-manager</code></pre>
-<hr>
 
 <h2 id="tests-en">5. Validation tests</h2>
 <table><thead><tr><th>Test</th><th>Tool</th><th>Result</th></tr></thead><tbody>
@@ -601,7 +590,6 @@ chmod 750 /var/ossec/integrations/custom-telegram*</code></pre>
 <tr><td>Create/modify/delete file on Desktop</td><td>Wazuh FIM</td><td>✅ Alert + Telegram notification</td></tr>
 <tr><td>Real-time notifications</td><td>Telegram Bot</td><td>✅ Received instantly</td></tr>
 </tbody></table>
-<hr>
 
 <h2 id="conclusion-en">Conclusion</h2>
 <p>The <strong>Wazuh + Snort + Telegram</strong> stack lets you build a functional monitoring system with entirely free, open source tools. Integration between the three tools works well, though Snort alert visualization in the Wazuh 4.9.2 Dashboard has known limitations — likely resolved in later versions.</p>
