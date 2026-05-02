@@ -587,9 +587,43 @@ footer {
 ═══════════════════════════ */
 
 .terminal-section-index {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(0,255,245,.12);
+  margin-top: 10px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.terminal-loader {
+  margin: 16px 0 14px;
+}
+
+.terminal-loader-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  letter-spacing: .12em;
+}
+
+.terminal-loader-text {
+  color: var(--cyan);
+  text-shadow: var(--glow-c);
+}
+
+.terminal-loader-bar {
+  width: 100%;
+  height: 8px;
+  border: 1px solid rgba(0,255,245,.18);
+  background: rgba(0,255,245,.04);
+  overflow: hidden;
+}
+
+.terminal-loader-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  box-shadow: 0 0 10px rgba(0,255,245,.25);
 }
 
 .terminal-link {
