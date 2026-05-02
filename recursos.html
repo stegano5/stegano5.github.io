@@ -50,39 +50,42 @@
           <span style="display:block;color:var(--text-dim)">  <span class="t-g">[+]</span> 12 categories  &nbsp; <span class="t-g">[+]</span> 47 tools  &nbsp; <span class="t-g">[+]</span> 23 cheatsheets</span>
           <span style="display:block"><span class="t-prompt">vault@arsenal</span><span class="t-cmd">:~$ </span><span id="typed-cmd" data-text="./load_arsenal.sh --all"></span>
           <!-- NEW SECTION ON TEMRINAL INDEX INTERACTIVE-->
-          <div class="terminal-loader-line">
-            <span class="loader-bracket">[</span><span class="loader-blocks">████████████████████</span><span class="loader-bracket">]</span>
-            <span class="loader-loaded">100% LOADED</span>
-          </div>        
-          <div class="terminal-section-index">
-          <span style="display:block">
-            <span class="t-prompt">vault@index</span><span class="t-cmd">:~$ </span>
-            <span class="t-cmd">cat sections.map</span>
-          </span>
-        
-          <a class="terminal-link" href="#cheatsheets">
-            <span class="t-g">[01]</span>
-            <span>CHEATSHEETS</span>
-          </a>
-        
-          <a class="terminal-link" href="#repository-labs">
-            <span class="t-g">[02]</span>
-            <span>REPOSITORY LABS</span>
-          </a>
-        
-          <a class="terminal-link" href="#essential-tools">
-            <span class="t-g">[03]</span>
-            <span>ESSENTIAL TOOLS</span>
-          </a>
-        
-          <a class="terminal-link" href="#posts-recursos">
-            <span class="t-g">[04]</span>
-            <span>POSTS RECURSOS</span>
-          </a>
-          <span style="display:block;margin-top:14px;">
-            <span class="t-prompt">vault@index</span><span class="t-cmd">:~$ </span>
-            <span class="t-c">select --section</span><span class="cursor"></span>
-          </span>
+          <div class="terminal-loader-line hidden" id="loader-line">
+            <span class="loader-bracket">[</span><span class="loader-blocks"><span id="loader-filled"></span><span id="loader-empty">████████████████████</span></span><span class="loader-bracket">]</span>
+            <span class="loader-loaded hidden" id="loader-loaded">100% LOADED</span>
+          </div>      
+          <div class="terminal-section-index hidden" id="section-index">
+            <span style="display:block">
+              <span class="t-prompt">vault@index</span><span class="t-cmd">:~$ </span>
+              <span class="t-cmd" id="typed-map" data-text="cat sections.map"></span>
+            </span>
+          
+            <div id="section-links" class="hidden">
+              <a class="terminal-link" href="#cheatsheets">
+                <span class="t-g">[01]</span>
+                <span>CHEATSHEETS</span>
+              </a>
+          
+              <a class="terminal-link" href="#repository-labs">
+                <span class="t-g">[02]</span>
+                <span>REPOSITORY LABS</span>
+              </a>
+          
+              <a class="terminal-link" href="#essential-tools">
+                <span class="t-g">[03]</span>
+                <span>ESSENTIAL TOOLS</span>
+              </a>
+          
+              <a class="terminal-link" href="#posts-recursos">
+                <span class="t-g">[04]</span>
+                <span>POSTS RECURSOS</span>
+              </a>
+            </div>
+          
+            <span id="select-line" class="hidden" style="display:block;margin-top:14px;">
+              <span class="t-prompt">vault@index</span><span class="t-cmd">:~$ </span>
+              <span class="t-c" id="typed-select" data-text="select --section"></span><span class="cursor"></span>
+            </span>
           </div>
           <!-- END NEW SECTION ON TEMRINAL INDEX INTERACTIVE-->
         </div>
@@ -90,7 +93,8 @@
     </div>
       
     <!-- CHEATSHEETS -->
-    <<section style="margin-bottom:90px;" class="reveal">     
+    <!--<section style="margin-bottom:90px;" class="reveal">-->
+    <section id="cheatsheets" style="margin-bottom:90px;" class="reveal">  
       <div class="sec-head">
         <span class="sec-num">01 //</span>
         <div class="sec-line"></div>
@@ -149,7 +153,7 @@
         <div class="sec-line"></div>
         <h2 class="sec-title">
           <span style="color:#fff;text-shadow:none;">REPOSITORY</span>
-          <span style="color:#fff;text-shadow:0 0 8px rgba(255,255,255,.35),0 0 24px rgba(255,255,255,.15);">LABS</span>
+          <span style="color:#fff;text-shadow:0 0 8px rgba(255,255,255,.75),0 0 18px rgba(255,255,255,.45),0 0 32px rgba(255,255,255,.25);">LABS</span>
         </h2>
       </div>
     
@@ -193,7 +197,8 @@
     </section>
 
     <!-- TOOLS TABLE -->
-    <section style="margin-bottom:90px;" class="reveal"> 
+    <!--<section style="margin-bottom:90px;" class="reveal">-->
+    <section id="essential-tools" style="margin-bottom:90px;" class="reveal">
      <div class="sec-head">
         <span class="sec-num">03 //</span>
         <div class="sec-line"></div>
@@ -387,7 +392,8 @@
     </section>
 
     <!-- POSTS RECURSOS — auto desde posts/index.json + localStorage -->
-    <section style="margin-bottom:90px;" class="reveal">    
+    <!--<section style="margin-bottom:90px;" class="reveal">-->
+    <section id="posts-recursos" style="margin-bottom:90px;" class="reveal">
       <div class="sec-head">
         <span class="sec-num">04 //</span>
         <div class="sec-line"></div>
@@ -422,6 +428,86 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     VaultPosts.render('rec-posts-list', 'rec');
+  });
+</script>
+<!-- prueba animación indice interactivo en terminal -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function typeText(el, text, speed = 35) {
+      if (!el) return;
+      el.textContent = '';
+
+      for (const char of text) {
+        el.textContent += char;
+        await sleep(speed);
+      }
+    }
+
+    async function loadBlocks(total = 20, speed = 35) {
+      const filled = document.getElementById('loader-filled');
+      const empty = document.getElementById('loader-empty');
+      if (!filled || !empty) return;
+
+      filled.textContent = '';
+      empty.textContent = '█'.repeat(total);
+
+      for (let i = 1; i <= total; i++) {
+        filled.textContent = '█'.repeat(i);
+        empty.textContent = '█'.repeat(total - i);
+        await sleep(speed);
+      }
+    }
+
+    async function runResourceTerminalSequence() {
+      const loaderLine = document.getElementById('loader-line');
+      const loaderLoaded = document.getElementById('loader-loaded');
+
+      const sectionIndex = document.getElementById('section-index');
+      const typedMap = document.getElementById('typed-map');
+      const sectionLinks = document.getElementById('section-links');
+
+      const selectLine = document.getElementById('select-line');
+      const typedSelect = document.getElementById('typed-select');
+
+      await sleep(1600);
+
+      loaderLine.classList.remove('hidden');
+      await loadBlocks(20, 35);
+      loaderLoaded.classList.remove('hidden');
+
+      await sleep(300);
+
+      sectionIndex.classList.remove('hidden');
+      await typeText(typedMap, typedMap.dataset.text, 35);
+
+      await sleep(200);
+      sectionLinks.classList.remove('hidden');
+
+      await sleep(350);
+      selectLine.classList.remove('hidden');
+      await typeText(typedSelect, typedSelect.dataset.text, 35);
+    }
+
+    runResourceTerminalSequence();
+
+    document.querySelectorAll('.terminal-link').forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const target = document.querySelector(this.getAttribute('href'));
+        if (!target) return;
+
+        const navOffset = 80;
+        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navOffset;
+
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      });
+    });
   });
 </script>
 <!-- counter prueba test-->  
