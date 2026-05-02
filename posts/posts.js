@@ -10,9 +10,9 @@
   'use strict';
 
   /* ─── CONSTANTS ─── */
-  const CAT_LABEL  = { blue: 'BLUE TEAM', red: 'RED TEAM', rec: 'RESOURCES', ctf: 'CTF', labs: 'LABS' };
-  const CAT_BADGE  = { blue: 'c', red: 'm', rec: 'g', ctf: 'y', labs: 'w' };
-  const CAT_FOLDER = { blue: 'blue-team', red: 'red-team',  rec: 'recursos',  ctf: 'ctf', labs: 'labs' };
+  const CAT_LABEL  = { blue: 'BLUE TEAM', red: 'RED TEAM', rec: 'RESOURCES', ctf: 'CTF', lab: 'LAB' };
+  const CAT_BADGE  = { blue: 'c', red: 'm', rec: 'g', ctf: 'y', lab: 'w' };
+  const CAT_FOLDER = { blue: 'blue-team', red: 'red-team',  rec: 'recursos',  ctf: 'ctf', lab: 'lab' };
 
   /* ─── SECURITY HELPERS ─── */
   function esc(str) {
@@ -28,7 +28,7 @@
   }
 
   function safeCat(cat) {
-    return ['blue', 'red', 'rec', 'ctf', 'labs'].includes(cat) ? cat : 'blue';
+    return ['blue', 'red', 'rec', 'ctf', 'lab'].includes(cat) ? cat : 'blue';
   }
 
   /* ─── BUILD A POST-ROW ELEMENT ─── */
@@ -106,7 +106,7 @@
   }
 
   /* ─── CAT CLASS para index.html (usa .post-cat.blue / .post-cat.red / .post-cat.green) ─── */
-  const CAT_CLASS = { blue: 'blue', red: 'red', rec: 'green', ctf: 'ctf', labs: 'labs' };
+  const CAT_CLASS = { blue: 'blue', red: 'red', rec: 'green', ctf: 'yellow', lab: 'white' };
 
   /* ─── PUBLIC API ─── */
 
