@@ -293,6 +293,7 @@ nav {
 .badge.c { color:var(--cyan); border:1px solid rgba(0,255,245,.28); }
 .badge.m { color:var(--magenta); border:1px solid rgba(255,0,170,.28); }
 .badge.g { color:var(--green); border:1px solid rgba(57,255,20,.28); }
+.badge.y { color: var(--yellow); border: 1px solid rgba(255,229,0,.38); box-shadow: var(--glow-y);}
 
 /* ═══════════════════════════
    POST CONTENT (article page)
