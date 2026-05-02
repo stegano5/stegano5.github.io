@@ -557,5 +557,19 @@ footer {
 .tfg-note p:last-child {
   margin-bottom: 0;
 }
- 
+
+/* ── POST-CAT badges (usados en index.html renderHome) ── */
+.post-cat {
+  font-family: var(--font-mono);
+  font-size: .6rem;
+  letter-spacing: .12em;
+  padding: 3px 10px;
+  border: 1px solid;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.post-cat.blue  { color: var(--cyan);    border-color: var(--cyan);    box-shadow: 0 0 6px rgba(0,255,245,.15); }
+.post-cat.red   { color: var(--magenta); border-color: var(--magenta); box-shadow: 0 0 6px rgba(255,0,170,.15); }
+.post-cat.green { color: var(--green);   border-color: var(--green);   box-shadow: 0 0 6px rgba(57,255,20,.15); }
+.post-cat.ctf   { color: var(--cyan);    border-color: var(--cyan);    box-shadow: 0 0 6px rgba(0,255,245,.15); }
 
