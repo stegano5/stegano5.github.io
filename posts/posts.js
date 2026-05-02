@@ -11,7 +11,7 @@
 
   /* ─── CONSTANTS ─── */
   const CAT_LABEL  = { blue: 'BLUE TEAM', red: 'RED TEAM', rec: 'RESOURCES', ctf: 'CTF' };
-  const CAT_BADGE  = { blue: 'c',         red: 'm',         rec: 'g',         ctf: 'c'  };
+  const CAT_BADGE  = { blue: 'c',         red: 'm',         rec: 'g',         ctf: 'y'  };
   const CAT_FOLDER = { blue: 'blue-team', red: 'red-team',  rec: 'recursos',  ctf: 'ctf' };
 
   /* ─── SECURITY HELPERS ─── */
@@ -106,7 +106,7 @@
   }
 
   /* ─── CAT CLASS para index.html (usa .post-cat.blue / .post-cat.red / .post-cat.green) ─── */
-  const CAT_CLASS = { blue: 'blue', red: 'red', rec: 'green', ctf: 'blue' };
+  const CAT_CLASS = { blue: 'blue', red: 'red', rec: 'green', ctf: 'ctf' };
 
   /* ─── PUBLIC API ─── */
 
