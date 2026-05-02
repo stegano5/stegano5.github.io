@@ -293,7 +293,10 @@ nav {
 .badge.c { color:var(--cyan); border:1px solid rgba(0,255,245,.28); }
 .badge.m { color:var(--magenta); border:1px solid rgba(255,0,170,.28); }
 .badge.g { color:var(--green); border:1px solid rgba(57,255,20,.28); }
-.badge.y { color: var(--yellow); border: 1px solid rgba(255,229,0,.38); box-shadow: var(--glow-y);}
+.badge.y { color: var(--yellow); border: 1px solid rgba(255,229,0,.38); box-shadow: var(--glow-y); }
+.badge.o {color: var(--orange); border: 1px solid rgba(255,106,0,.40); box-shadow: 0 0 8px #ff6a00, 0 0 24px rgba(255,106,0,.25); }
+/*Color Para futura sección de LABS*/
+.badge.w {color: #ffffff; border: 1px solid rgba(255,255,255,.45); box-shadow: 0 0 8px rgba(255,255,255,.35), 0 0 24px rgba(255,255,255,.15); }
 
 /* ═══════════════════════════
    POST CONTENT (article page)
@@ -575,4 +578,7 @@ footer {
 .post-cat.red   { color: var(--magenta); border-color: var(--magenta); box-shadow: 0 0 6px rgba(255,0,170,.15); }
 .post-cat.green { color: var(--green);   border-color: var(--green);   box-shadow: 0 0 6px rgba(57,255,20,.15); }
 .post-cat.ctf   { color: var(--yellow);  border-color: var(--yellow);  box-shadow: var(--glow-y); }
+.post-cat.orange { color: var(--orange); border-color: var(--orange);  box-shadow: 0 0 8px #ff6a00, 0 0 24px rgba(255,106,0,.25); }
+.post-cat.white,
+.post-cat.labs {color: #ffffff; border-color: rgba(255,255,255,.65); box-shadow: 0 0 8px rgba(255,255,255,.35), 0 0 24px rgba(255,255,255,.15); }
 
