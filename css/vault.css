@@ -592,38 +592,32 @@ footer {
   border-top: none;
 }
 
-.terminal-loader {
-  margin: 16px 0 14px;
-}
-
-.terminal-loader-head {
+.terminal-loader-line {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
+  gap: 4px;
+  margin: 14px 0 16px;
   font-family: var(--font-mono);
-  font-size: .72rem;
-  letter-spacing: .12em;
+  font-size: .76rem;
+  letter-spacing: .08em;
 }
 
-.terminal-loader-text {
+.loader-bracket {
+  color: var(--green);
+  text-shadow: var(--glow-g);
+}
+
+.loader-blocks {
   color: var(--cyan);
   text-shadow: var(--glow-c);
+  letter-spacing: 0;
 }
 
-.terminal-loader-bar {
-  width: 100%;
-  height: 8px;
-  border: 1px solid rgba(0,255,245,.18);
-  background: rgba(0,255,245,.04);
-  overflow: hidden;
-}
-
-.terminal-loader-fill {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, var(--green), var(--cyan));
-  box-shadow: 0 0 10px rgba(0,255,245,.25);
+.loader-loaded {
+  margin-left: 10px;
+  color: var(--magenta);
+  text-shadow: var(--glow-m);
+  letter-spacing: .12em;
 }
 
 .terminal-link {
