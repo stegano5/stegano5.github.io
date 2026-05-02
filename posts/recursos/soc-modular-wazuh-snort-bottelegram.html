@@ -669,7 +669,7 @@ chmod 750 /var/ossec/integrations/custom-telegram*</code></pre>
     bar.style.width = Math.min(100, (scrolled / total) * 100) + '%';
   });
 
-  // TOC bilingüe — sincronizar con el idioma activo
+  // TOC bilingüe
   function syncTocLang(lang) {
     document.querySelectorAll('.lang-es-toc').forEach(el => {
       el.style.display = lang === 'es' ? '' : 'none';
@@ -678,12 +678,12 @@ chmod 750 /var/ossec/integrations/custom-telegram*</code></pre>
       el.style.display = lang === 'en' ? '' : 'none';
     });
   }
-  // Aplicar idioma inicial y observar cambios
+ 
   document.addEventListener('DOMContentLoaded', () => {
     const lang = localStorage.getItem('vault_lang') || 'es';
     syncTocLang(lang);
   });
-  // Observar cambios de idioma via MutationObserver sobre el atributo lang del html
+  
   new MutationObserver(() => {
     syncTocLang(document.documentElement.lang || 'es');
   }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
