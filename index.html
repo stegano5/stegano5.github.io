@@ -488,6 +488,19 @@
   document.addEventListener('DOMContentLoaded', () => {
     // Renderizar los 5 posts más recientes en home (todos los tags)
     VaultPosts.renderHome('home-posts-list', 5);
+    // Actualizar fecha ultimo post
+    (async function () {
+      try {
+        const res = await fetch('posts/index.json');
+        const posts = await res.json();
+        if (Array.isArray(posts) && posts.length) {
+          const latest = posts.reduce((a, b) => (a.date > b.date ? a : b));
+          const el = document.getElementById('last-update-val');
+          if (el) el.textContent = latest.date + ' 12:00';
+        }
+      } catch (e) {
+      }
+    })();    
     const els = document.querySelectorAll('[data-target]');
     const obs = new IntersectionObserver(entries => {
       entries.forEach(e => {
