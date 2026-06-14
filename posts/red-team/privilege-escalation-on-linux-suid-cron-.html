@@ -98,8 +98,8 @@
       <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);" lang-es>// 14 MIN LECTURA</span>
     </div>
     <h1 style="font-family:var(--font-hd);font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:12px;">Privilege Escalation on Linux — SUID, cron jobs and capabilities</h1>
-    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-en><em>Situation</em>: You have a low-privilege shell on a Linux machine. And you wonder, now what? This post covers the systematic methodology of privilege escalation: from initial enumeration to the most exploited vectors — SUID, sudo, cron jobs, capabilities and kernel exploits.</p>
-    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-es><em>Situación</em>: Tienes una shell de bajo privilegio en una máquina Linux. Y te preguntas ¿y ahora qué? Este post cubre la metodología sistemática de escalada de privilegios: desde la enumeración inicial hasta los vectores más explotados — SUID, sudo, cron jobs, capabilities y kernel exploits.</p>
+    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-en><em>Situation</em>: You have a low-privilege shell on a Linux machine. Now what? This post covers the systematic methodology of privilege escalation: from initial enumeration to the most exploited vectors — SUID, sudo, cron jobs, capabilities and kernel exploits — with real commands and practical examples.</p>
+    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-es><em>Situación</em>: Tienes una shell de bajo privilegio en una máquina Linux. ¿Y ahora qué? Este post cubre la metodología sistemática de escalada de privilegios: desde la enumeración inicial hasta los vectores más explotados — SUID, sudo, cron jobs, capabilities y kernel exploits — con comandos reales y ejemplos prácticos.</p>
   </div>
 
   <div class="post-layout">
@@ -107,11 +107,11 @@
 
       <!-- ENGLISH -->
       <div lang-en>
-        <blockquote><strong>Red Team</strong> · Update of the post from 2024-08-05</blockquote>
-        <blockquote>📝 <strong>NOTE:</strong> All techniques in this post assume you have explicit authorization over the target system. They apply to legitimate pentesting environments, CTFs and your own labs for educational purposes. REMEMBER that privilege escalation on systems you don't own without permission is <em>illegal</em>.</blockquote>
-        <hr>
+<blockquote><strong>Red Team</strong> · Update of the original post (2024-08-05)</blockquote>
+<blockquote>📝 <strong>NOTE:</strong> All techniques in this post assume you have explicit authorization over the target system. They apply to legitimate pentesting environments, CTFs and your own labs for educational purposes. REMEMBER that privilege escalation on systems you don't own without permission is <em>illegal</em>.</blockquote>
+<hr>
 <h2 id="mindset-en">The privilege escalation mindset</h2>
-<p>Getting the initial foothold rarely gives you full control. You usually land as an unprivileged user — <code>www-data</code>, a service account, or a low-level user. The goal of escalation is to move from that limited access to <strong>root</strong>, total control of the system.</p>
+<p>Getting the initial foothold rarely gives you full control. You usually land as an unprivileged user — <code>www-data</code>, a service account, or a low-level account. The goal of escalation is to move from that limited access to <strong>root</strong>, total control of the system.</p>
 <p>Linux privilege escalation falls into two broad categories:</p>
 <ul>
 <li><strong>Vertical escalation:</strong> moving from an unprivileged user to root (or to a more privileged user).</li>
@@ -169,7 +169,7 @@ chmod +x /tmp/linpeas.sh
 # pspy — monitor processes without root privileges
 # (excellent for spotting running cron jobs)
 ./pspy64</code></pre>
-<blockquote>⚠️ <strong>WARNING:</strong> LinPEAS is very noisy and leaves traces in logs. In a real engagement with an active Blue Team, consider selective manual enumeration instead of launching scripts that trip every alarm (that's if you want a blackbox approach; if you have the organization's permission, LinPEAS is far more practical — time is gold).</blockquote>
+<blockquote>⚠️ <strong>WARNING:</strong> LinPEAS is very noisy and leaves traces in logs. In a real engagement with an active Blue Team, consider selective manual enumeration instead of launching scripts that trip every alarm (that's for a blackbox approach; with the organization's permission, LinPEAS is far more practical — time is gold).</blockquote>
 <hr>
 <h2 id="phase3-en">Phase 3: Escalation vectors</h2>
 <h3 id="sudo-en">3.1 — Misconfigured sudo</h3>
@@ -321,7 +321,7 @@ export TERM=xterm</code></pre>
 <p>In an engagement, you must document how you reached root with screenshots and the exact commands — sometimes the client even requests a dump of the history. The report is as important as the access.</p>
 <hr>
 <h2 id="checklist-en">Summary checklist</h2>
-<p>When you're in front of a Linux machine, go through this list in order (everyone can build their own list, this is an example):</p>
+<p>When you're in front of a Linux machine, go through this list in order (everyone can build their own, this is an example):</p>
 <ul>
 <li><code>id</code> and <code>sudo -l</code> — quick privilege check</li>
 <li><code>uname -a</code> — kernel version</li>
@@ -339,9 +339,9 @@ export TERM=xterm</code></pre>
 
       <!-- ESPAÑOL -->
       <div lang-es>
-        <blockquote><strong>Red Team</strong> · Actualización del post del 05/08/2024</blockquote>
-        <blockquote>📝 <strong>NOTA:</strong> Todas las técnicas de este post asumen que tienes autorización explícita sobre el sistema objetivo. Aplican a entornos de pentesting legítimo, CTFs y laboratorios propios con fines educativos. RECUERDA que la escalada de privilegios en sistemas ajenos sin permiso es <em>ilegal</em>.</blockquote>
-        <hr>
+<blockquote><strong>Red Team</strong> · Actualización del post original (05/08/2024)</blockquote>
+<blockquote>📝 <strong>NOTA:</strong> Todas las técnicas de este post asumen que tienes autorización explícita sobre el sistema objetivo. Aplican a entornos de pentesting legítimo, CTFs y laboratorios propios con fines educativos. RECUERDA que la escalada de privilegios en sistemas ajenos sin permiso es <em>ilegal</em>.</blockquote>
+<hr>
 <h2 id="mentalidad-es">La mentalidad de la escalada de privilegios</h2>
 <p>Conseguir el primer acceso (foothold) rara vez te da control total. Normalmente aterrizas como un usuario sin privilegios — <code>www-data</code>, un usuario de servicio, o una cuenta de bajo nivel. El objetivo de la escalada es pasar de ese acceso limitado a <strong>root</strong>, el control absoluto del sistema.</p>
 <p>La escalada de privilegios en Linux se divide en dos grandes categorías:</p>
@@ -401,7 +401,7 @@ chmod +x /tmp/linpeas.sh
 # pspy — monitoriza procesos sin privilegios de root
 # (excelente para detectar cron jobs en ejecución)
 ./pspy64</code></pre>
-<blockquote>⚠️ <strong>ADVERTENCIA:</strong> LinPEAS hace mucho ruido y deja rastro en logs. En un engagement real con Blue Team activo, hay que considerar una enumeración manual selectiva en lugar de lanzar scripts que disparan todas las alarmas (eso si se quiere hacer como blackbox, si se tiene permiso de la organización es mucho más factible el LinPEAS — el tiempo es oro).</blockquote>
+<blockquote>⚠️ <strong>ADVERTENCIA:</strong> LinPEAS hace mucho ruido y deja rastro en logs. En un engagement real con Blue Team activo, hay que considerar una enumeración manual selectiva en lugar de lanzar scripts que disparan todas las alarmas (eso si se quiere hacer como blackbox; si se tiene permiso de la organización es mucho más factible el LinPEAS — el tiempo es oro).</blockquote>
 <hr>
 <h2 id="fase3-es">Fase 3: Vectores de escalada</h2>
 <h3 id="sudo-es">3.1 — sudo mal configurado</h3>
@@ -567,6 +567,7 @@ export TERM=xterm</code></pre>
 </ul>
 <hr>
 <blockquote>📝 <strong>NOTA:</strong> Este post es de carácter educativo y forma parte de la base de conocimiento de The Vault. Practica estas técnicas en entornos controlados como HackTheBox, TryHackMe o tu propio laboratorio.</blockquote>
+
       </div>
 
       <hr class="divider">
@@ -645,5 +646,3 @@ export TERM=xterm</code></pre>
         async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
-
-
