@@ -1,5 +1,5 @@
 # THE VAULT — Cyberpunk Cybersecurity Site
-**ST3G4N05 // MUNCHK1N**
+**ST3G4N05 // N0xFIX3R // JMURU**
 
 Sitio de conocimiento de ciberseguridad. 
 
